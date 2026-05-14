@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node -e \"const db = require\\('./packages/backend/node_modules/better-sqlite3'\\); console.log\\('better-sqlite3 OK'\\)\")",
+      "Bash(node -e \"const db = require\\('./node_modules/better-sqlite3'\\); console.log\\('better-sqlite3 OK'\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); pkgs=d.get\\('packages',{}\\); print\\(f'{len\\(pkgs\\)} packages in lockfile'\\)\")",
+      "Bash(cd /c/Users/ramos/GitHub/isovault && ls node_modules/ | wc -l && ls node_modules/.bin/ | grep -E \"tsx|vite|react\" | head -10)",
+      "Read(//c/c/Users/ramos/GitHub/isovault/**)",
+      "Bash(node_modules/.bin/tsx.cmd --version)",
+      "Bash(node_modules/.bin/tsc.cmd --noEmit --project packages/backend/tsconfig.json)",
+      "Bash(node_modules/.bin/tsc.cmd --noEmit --project packages/frontend/tsconfig.json)",
+      "Bash(node_modules/.bin/jest.cmd --testPathPattern=\"packages/backend/src/__tests__\" --passWithNoTests)",
+      "Bash(node --experimental-vm-modules node_modules/.bin/jest.cmd --project packages/backend --passWithNoTests)",
+      "Bash(npm test *)"
+    ]
+  }
+}

@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens — dark mode (default) ─────────────────────────────────── */
+:root {
+  --bg-base:        #0f1117;
+  --bg-surface:     #161b27;
+  --bg-elevated:    #1e2537;
+  --bg-popup:       #252e42;
+  --bg-highlight:   #2d3650;
+
+  --border-subtle:  rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.10);
+  --border-strong:  rgba(255,255,255,0.18);
+
+  --text-primary:   #e8eaf0;
+  --text-secondary: #8b92a8;
+  --text-muted:     #545d75;
+  --text-disabled:  #384060;
+
+  --accent:         #5b7cf6;
+  --accent-hover:   #3d5bd4;
+  --accent-subtle:  rgba(91,124,246,0.12);
+
+  --color-success:        #2dd4a0;
+  --color-success-subtle: rgba(45,212,160,0.10);
+  --color-warning:        #f5a623;
+  --color-warning-subtle: rgba(245,166,35,0.12);
+  --color-danger:         #f04b4b;
+  --color-danger-subtle:  rgba(240,75,75,0.10);
+  --color-info:           #5b7cf6;
+  --color-info-subtle:    rgba(91,124,246,0.10);
+
+  /* Aliases used by components */
+  --bg-input:         #1a2035;
+  --bg-hover:         rgba(255,255,255,0.06);
+  --color-error:          var(--color-danger);
+  --color-error-subtle:   var(--color-danger-subtle);
+
+  --status-active:   #2dd4a0;
+  --status-download: #5b7cf6;
+  --status-archive:  #545d75;
+  --status-corrupt:  #f04b4b;
+  --status-pending:  #f5a623;
+
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* ─── Light mode ─────────────────────────────────────────────────────────── */
+html.light {
+  --bg-base:        #f4f5f7;
+  --bg-surface:     #ffffff;
+  --bg-elevated:    #f0f1f5;
+  --bg-popup:       #ffffff;
+  --bg-highlight:   #eef0ff;
+
+  --border-subtle:  rgba(0,0,0,0.05);
+  --border-default: rgba(0,0,0,0.10);
+  --border-strong:  rgba(0,0,0,0.18);
+
+  --text-primary:   #111827;
+  --text-secondary: #4b5563;
+  --text-muted:     #9ca3af;
+  --text-disabled:  #d1d5db;
+
+  --accent:         #4361d8;
+  --accent-hover:   #2f4fba;
+  --accent-subtle:  rgba(67,97,216,0.08);
+
+  --color-success:        #0d9e74;
+  --color-success-subtle: rgba(13,158,116,0.08);
+  --color-warning:        #d48a0f;
+  --color-warning-subtle: rgba(212,138,15,0.10);
+  --color-danger:         #dc2626;
+  --color-danger-subtle:  rgba(220,38,38,0.08);
+
+  /* Aliases */
+  --bg-input:         #f8f9fc;
+  --bg-hover:         rgba(0,0,0,0.04);
+  --color-error:          var(--color-danger);
+  --color-error-subtle:   var(--color-danger-subtle);
+}
+
+/* ─── Base styles ────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+}
+
+/* ─── Focus ring ─────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .progress-fill {
+    transition: width 250ms ease-out;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(16px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 200ms ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 120ms ease;
+  }
+}

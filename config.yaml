@@ -1,0 +1,32 @@
+server:
+  port: 3721
+  host: "0.0.0.0"
+  cors_origins:
+    - "http://localhost:5173"
+
+storage:
+  path: "/data/iso-store"
+  alert_threshold_percent: 80
+
+downloads:
+  max_concurrent: 3
+  retry_max_attempts: 3
+  retry_base_delay_seconds: 30
+  timeout_seconds: 3600
+
+retention:
+  default_count: 5
+  default_behavior: "archive"    # archive | delete
+
+scheduler:
+  watcher_check_interval_cron: "0 * * * *"    # every hour
+  db_backup_cron: "0 2 * * *"                 # 2am daily
+  cleanup_cron: "0 3 * * *"                   # 3am daily
+
+security:
+  ssrf_protection: true
+  max_redirects: 5
+
+logging:
+  level: "info"                  # debug | info | warn | error
+  retention_days: 30
