@@ -11,6 +11,7 @@ RUN npm ci
 FROM node:20-alpine AS build
 WORKDIR /build
 COPY --from=deps /build/node_modules ./node_modules
+COPY --from=deps /build/packages/backend/node_modules ./packages/backend/node_modules
 COPY . .
 RUN npm run build
 
