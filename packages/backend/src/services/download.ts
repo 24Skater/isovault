@@ -133,7 +133,12 @@ class DownloadManager {
     const available = config.downloads.maxConcurrent - this.active.size;
     if (available <= 0) return;
 
-    const db = getDb();
+    let db: ReturnType<typeof getDb>;
+    try {
+      db = getDb();
+    } catch {
+      return;
+    }
     const rows = db
       .prepare(
         `SELECT

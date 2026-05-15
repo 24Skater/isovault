@@ -4,6 +4,7 @@ WORKDIR /build
 COPY package*.json ./
 COPY packages/backend/package*.json ./packages/backend/
 COPY packages/frontend/package*.json ./packages/frontend/
+COPY packages/e2e/package*.json ./packages/e2e/
 RUN npm ci
 
 # ─── Stage 2: Build ───────────────────────────────────────────────────────────
