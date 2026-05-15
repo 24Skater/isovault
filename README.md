@@ -1,84 +1,51 @@
 <div align="center">
+  <img src="./docs/banner.svg" alt="IsoVault" width="100%" />
+</div>
 
-<h1>🗄️ IsoVault</h1>
+<div align="center">
 
-<p><strong>Self-hosted ISO library that watches, downloads, verifies, and rotates OS distributions automatically.</strong></p>
-
-<p>
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#how-it-works">How It Works</a> •
-  <a href="#configuration">Configuration</a> •
-  <a href="#api-reference">API</a> •
-  <a href="#webhooks">Webhooks</a>
-</p>
-
-![Build](https://img.shields.io/github/actions/workflow/status/owner/isovault/ci.yml?branch=main&label=build)
-![License](https://img.shields.io/github/license/owner/isovault?color=blue)
-![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
-![Version](https://img.shields.io/github/v/release/owner/isovault?label=release)
+[![CI](https://img.shields.io/github/actions/workflow/status/24Skater/isovault/ci.yml?branch=main&style=flat-square&label=CI&color=1a3a6e)](https://github.com/24Skater/isovault/actions)
+[![License](https://img.shields.io/github/license/24Skater/isovault?style=flat-square&color=1a3a6e)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-flat-square?style=flat-square&color=1a3a6e)](https://nodejs.org)
+[![Release](https://img.shields.io/github/v/release/24Skater/isovault?style=flat-square&color=1a3a6e)](https://github.com/24Skater/isovault/releases)
 
 </div>
 
 ---
 
-IsoVault gives homelabbers and sysadmins a single place to manage OS ISO files. Point it at an RSS feed, a webpage, a JSON API, or a checksum file — it handles discovery, download queuing, integrity verification, retention rotation, and signed webhook delivery, all without manual intervention.
+IsoVault is a self-hosted service for managing OS ISO files. Define a source, choose a watch strategy, and IsoVault handles version discovery, download queuing, checksum verification, retention rotation, and signed webhook delivery — without manual intervention.
 
-```
-┌───────────────┐   watch   ┌──────────────────┐   queue   ┌──────────────┐
-│  RSS / HTML   │──────────▶│  Watcher Engine   │──────────▶│   Downloader │
-│  JSON / CRON  │           │  (5 strategies)   │           │  (3 parallel)│
-└───────────────┘           └──────────────────┘           └──────┬───────┘
-                                                                   │
-                    ┌──────────────────────────────────────────────┤
-                    ▼                    ▼                          ▼
-             ┌─────────────┐   ┌──────────────────┐   ┌───────────────────┐
-             │  Checksum   │   │  Retention Policy │   │  Webhook Delivery │
-             │  Verifier   │   │  (archive/delete) │   │  (HMAC-SHA256)    │
-             └─────────────┘   └──────────────────┘   └───────────────────┘
-```
+<div align="center">
+  <img src="./docs/screenshot-dashboard.png" alt="IsoVault dashboard" width="860" />
+  <br/><br/>
+  <img src="./docs/screenshot-catalog.png" alt="ISO catalog with watch status" width="860" />
+</div>
 
----
+## Contents
 
-## Features
-
-**Discovery**
-- 📡 **5 watch strategies** — RSS feeds, HTML scraping, JSON APIs, checksum diffing, and filename patterns
-- 🕐 **Cron-scheduled polling** — per-definition intervals, configurable globally
-
-**Downloads**
-- ⚡ **Concurrent queue** — up to 3 parallel downloads with per-download retry and backoff
-- 📶 **Real-time progress** — WebSocket stream with bytes/sec and ETA
-- 🔁 **Automatic retry** — configurable attempts and base delay
-
-**Integrity**
-- 🔒 **Checksum verification** — SHA-256, SHA-512, and MD5; re-verify any file on demand
-- 🛡️ **SSRF protection** — blocks private-range and loopback download targets
-- 🔗 **Redirect limits** — max 5 hops by default
-
-**Storage & Retention**
-- 🗂️ **Per-definition policies** — keep the last N versions; archive or permanently delete the rest
-- 💾 **Daily SQLite backups** — auto-rotated, last 7 kept
-- 📊 **Disk usage monitoring** — configurable alert threshold on the dashboard
-
-**Observability**
-- 📋 **Audit log** — every operation recorded with severity levels and entity context
-- 🪝 **Signed webhooks** — HMAC-SHA256 on every event delivery
-- 🩺 **Liveness + readiness probes** — `/health` and `/ready` for container orchestration
+- [Quick Start](#quick-start)
+- [How It Works](#how-it-works)
+- [Configuration](#configuration)
+- [Authentication](#authentication)
+- [API Reference](#api-reference)
+- [Webhooks](#webhooks)
+- [Backups](#backups)
+- [Development](#development)
 
 ---
 
 ## Quick Start
 
-**Requirements:** Docker and Docker Compose (or Node.js ≥ 20 for local dev)
+**Requirements:** Docker and Docker Compose, or Node.js ≥ 20
 
 ```bash
-git clone https://github.com/owner/isovault.git
+git clone https://github.com/24Skater/isovault.git
 cd isovault
 cp .env.example .env
 docker compose up -d
 ```
 
-Get your auto-generated API key from the first-boot log:
+Retrieve your auto-generated API key from the first-boot log:
 
 ```bash
 docker compose logs backend | grep "API key"
@@ -92,11 +59,11 @@ Open the dashboard at **[http://localhost:3721](http://localhost:3721)**.
 ```bash
 npm install
 cp .env.example .env
-# Set ISO_STORE_PATH to a writable local directory in .env
+# Set ISO_STORE_PATH to a writable directory in .env
 npm run dev
 ```
 
-Backend runs on `:3721`, frontend dev server on `:5173`.
+The backend starts on `:3721` and the Vite dev server on `:5173`.
 
 </details>
 
@@ -111,8 +78,8 @@ services:
     ports:
       - "3721:3721"
     volumes:
-      - /path/to/iso-store:/data/iso-store   # where ISOs are saved
-      - isovault-db:/data/db                 # SQLite + backups
+      - /path/to/iso-store:/data/iso-store   # ISO file storage
+      - isovault-db:/data/db                  # SQLite database + backups
       - ./config.yaml:/app/config.yaml:ro
     environment:
       NODE_ENV: production
@@ -123,98 +90,118 @@ volumes:
   isovault-db:
 ```
 
+Health probes (`/health`, `/ready`) are available for container orchestration.
+
 </details>
 
 ---
 
 ## How It Works
 
-IsoVault models every OS distribution as an **ISO Definition** — a record that describes where a distro lives, how to detect new versions, and what to do with old ones. Each definition runs independently on its own schedule.
+Each OS distribution is modeled as an **ISO Definition** — a record that describes where a distro lives, how to detect new versions, and what to do with old ones. Definitions run independently on configurable schedules.
 
-### Watch Strategies
+### Watch strategies
 
-| Strategy | How detection works | Example use |
-|----------|---------------------|-------------|
-| `rss` | Polls an RSS/Atom feed, extracts version from item titles | Fedora, Arch Linux announcements |
-| `html_scrape` | Fetches a webpage and uses CSS selectors to find version + download link | Ubuntu releases page |
-| `json_api` | Polls a JSON endpoint, extracts version and URL via dot-path expressions | GitHub Releases API |
-| `checksum` | Downloads a checksum file and compares hash to detect a changed release | Debian, Alpine stable |
-| `filename` | Scans a directory index using a regex, constructs the download URL from a template | kernel.org mirrors |
+| Strategy | Detection method | Typical use |
+|---|---|---|
+| `rss` | Polls an RSS/Atom feed; extracts version from item titles | Fedora, Arch Linux |
+| `html_scrape` | Fetches a page; CSS selectors pick the version string and download link | Ubuntu releases page |
+| `json_api` | Polls a JSON endpoint; dot-path expressions navigate to version and URL | GitHub Releases API |
+| `checksum` | Downloads a checksum file; a changed hash signals a new release | Debian, Alpine stable |
+| `filename` | Scans a directory index with a regex; constructs the download URL from a template | kernel.org mirrors |
 
-### Download lifecycle
+### Version lifecycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> pending : version detected
-    pending --> downloading : job dequeued
-    downloading --> active : checksum ✓
-    downloading --> corrupt : checksum ✗
-    active --> archived : retention policy
-    archived --> active : manual restore
-    active --> deleted : permanent delete
-    corrupt --> deleted : purge
+    [*]          --> pending    : version detected
+    pending      --> downloading : job dequeued
+    downloading  --> active    : checksum verified
+    downloading  --> corrupt   : checksum mismatch
+    active       --> archived  : retention policy
+    archived     --> active    : manual restore
+    active       --> deleted   : permanent delete
+    corrupt      --> deleted   : purge
 ```
 
-### Example: define Ubuntu with HTML scraping
+### Defining a source
 
 ```bash
-curl -X POST http://localhost:3721/api/definitions \
+curl -sX POST http://localhost:3721/api/definitions \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Ubuntu 24.04 LTS",
-    "family": "ubuntu",
-    "architecture": "x86_64",
-    "checksumAlgo": "sha256",
-    "retentionCount": 3,
-    "retentionBehavior": "archive",
-    "watchEnabled": true,
-    "watchStrategy": "html_scrape",
+    "name":                 "Ubuntu 24.04 LTS",
+    "family":               "ubuntu",
+    "architecture":         "x86_64",
+    "checksumAlgo":         "sha256",
+    "retentionCount":       3,
+    "retentionBehavior":    "archive",
+    "watchEnabled":         true,
+    "watchStrategy":        "html_scrape",
     "watchIntervalMinutes": 1440,
     "watchConfig": {
-      "pageUrl": "https://releases.ubuntu.com/noble/",
-      "versionSelector": "h1",
-      "downloadLinkSelector": "a[href$='.iso']"
+      "pageUrl":              "https://releases.ubuntu.com/noble/",
+      "versionSelector":      "h1",
+      "downloadLinkSelector": "a[href$=\".iso\"]"
     }
   }'
 ```
 
-When a new version is detected, IsoVault queues the download, verifies the checksum, archives older versions, and fires your webhooks — automatically.
+When a new version is detected, IsoVault queues the download, verifies the checksum, rotates old versions according to the retention policy, and fires any registered webhooks.
 
 ---
 
 ## Configuration
 
-IsoVault reads `config.yaml` at startup. All values can be overridden with environment variables.
+IsoVault reads `config.yaml` at startup (path overridable via `ISO_MANAGER_CONFIG`). Every value can be overridden with an environment variable.
+
+### Server and storage
 
 | `config.yaml` key | Env var | Default | Description |
 |---|---|---|---|
 | `server.port` | `PORT` | `3721` | HTTP listen port |
 | `server.host` | — | `0.0.0.0` | Bind address |
 | `storage.path` | `ISO_STORE_PATH` | `/data/iso-store` | Root directory for ISO files |
-| `storage.alert_threshold_percent` | — | `80` | Dashboard disk warning level (%) |
-| `downloads.max_concurrent` | — | `3` | Parallel download slots |
-| `downloads.retry_max_attempts` | — | `3` | Per-file retry limit |
-| `downloads.retry_base_delay_seconds` | — | `30` | Backoff base delay |
-| `downloads.timeout_seconds` | — | `3600` | Per-download timeout |
-| `retention.default_count` | — | `5` | Versions to keep per definition |
-| `retention.default_behavior` | — | `archive` | `archive` or `delete` excess versions |
-| `scheduler.watcher_check_interval_cron` | — | `0 * * * *` | Watcher sweep frequency |
-| `scheduler.db_backup_cron` | — | `0 2 * * *` | Database backup time |
-| `scheduler.cleanup_cron` | — | `0 3 * * *` | Retention enforcement time |
-| `security.ssrf_protection` | — | `true` | Block private-range download URLs |
-| `security.max_redirects` | — | `5` | Max HTTP redirects per download |
-| `logging.level` | `ISO_MANAGER_LOG_LEVEL` | `info` | `debug` \| `info` \| `warn` \| `error` |
-| `logging.retention_days` | — | `30` | Audit log retention |
+| `storage.alert_threshold_percent` | — | `80` | Dashboard disk-usage warning threshold |
+
+### Downloads and retention
+
+| `config.yaml` key | Default | Description |
+|---|---|---|
+| `downloads.max_concurrent` | `3` | Parallel download slots |
+| `downloads.retry_max_attempts` | `3` | Per-file retry limit |
+| `downloads.retry_base_delay_seconds` | `30` | Exponential backoff base |
+| `downloads.timeout_seconds` | `3600` | Per-download hard timeout |
+| `retention.default_count` | `5` | Versions to keep per definition |
+| `retention.default_behavior` | `archive` | `archive` or `delete` excess versions |
+
+### Scheduler
+
+| `config.yaml` key | Default | Description |
+|---|---|---|
+| `scheduler.watcher_check_interval_cron` | `0 * * * *` | How often watchers run |
+| `scheduler.db_backup_cron` | `0 2 * * *` | Database backup schedule |
+| `scheduler.cleanup_cron` | `0 3 * * *` | Retention enforcement schedule |
+
+### Security and logging
+
+| `config.yaml` key | Default | Description |
+|---|---|---|
+| `security.ssrf_protection` | `true` | Block private-range download URLs |
+| `security.max_redirects` | `5` | Maximum HTTP redirects per request |
+| `logging.level` | `info` | `debug` \| `info` \| `warn` \| `error` |
+| `logging.retention_days` | `30` | Audit log retention window |
 
 ### Environment-only variables
 
 | Variable | Description |
 |---|---|
-| `ISO_MANAGER_API_KEY` | Fixed API key (auto-generated on first boot if unset) |
-| `ISO_MANAGER_CONFIG` | Path to `config.yaml` (default: `./config.yaml`) |
+| `ISO_MANAGER_API_KEY` | Fixed API key — auto-generated on first boot if unset |
+| `ISO_MANAGER_CONFIG` | Path to `config.yaml` |
 | `ISO_MANAGER_DB_PATH` | SQLite database path override |
-| `NODE_ENV` | Set to `production` to disable stack traces and pretty logs |
+| `ISO_MANAGER_LOG_LEVEL` | Log level override |
+| `NODE_ENV` | Set to `production` to disable stack traces and pretty-printing |
 
 ---
 
@@ -232,57 +219,57 @@ The key is auto-generated on first boot and printed once to stdout. To use a fix
 ISO_MANAGER_API_KEY=your-secret-key
 ```
 
-To rotate the key, delete the `api_key_hash` row from the `settings` table and restart. The new key is printed to the log on the next boot.
+**Key rotation:** delete the `api_key_hash` row from the `settings` table and restart. The new key prints to the log on next boot.
 
 ---
 
 ## API Reference
 
-All endpoints return JSON. Errors follow [RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) with a `requestId` field for log correlation.
+All endpoints return JSON. Errors follow [RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) and include a `requestId` field for log correlation.
 
 <details>
-<summary>Full endpoint table</summary>
+<summary>Endpoints</summary>
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Liveness check — always 200 if the process is up (no auth) |
-| `GET` | `/ready` | Readiness check — 503 if DB or storage is unavailable (no auth) |
-| `GET` | `/api/stats` | Aggregated dashboard stats |
-| `GET` | `/api/definitions` | List all ISO definitions |
-| `POST` | `/api/definitions` | Create a new definition |
-| `GET` | `/api/definitions/:id` | Get a single definition |
-| `PATCH` | `/api/definitions/:id` | Update a definition |
-| `DELETE` | `/api/definitions/:id` | Delete a definition |
-| `GET` | `/api/definitions/:id/versions` | List versions for a definition |
-| `GET` | `/api/versions` | Cross-definition version query (`?status=archived`) |
-| `GET` | `/api/versions/:id/download` | Stream the ISO file |
-| `GET` | `/api/versions/:id/verify` | Re-verify checksum on disk |
-| `PATCH` | `/api/versions/:id/archive` | Archive a version |
-| `PATCH` | `/api/versions/:id/activate` | Restore an archived version |
-| `DELETE` | `/api/versions/:id` | Permanently delete version + file |
-| `GET` | `/api/downloads` | List active and queued download jobs |
-| `POST` | `/api/downloads` | Trigger a manual download |
-| `DELETE` | `/api/downloads/:id` | Cancel a queued or running download |
-| `GET` | `/api/audit` | Audit log (`?severity=warn&eventType=download.failed`) |
-| `GET` | `/api/settings` | List all runtime settings |
-| `PUT` | `/api/settings/:key` | Update a runtime setting |
-| `GET` | `/api/storage/stats` | Disk usage for the ISO store |
-| `GET` | `/api/webhooks` | List registered webhooks |
-| `POST` | `/api/webhooks` | Register a new webhook |
-| `PATCH` | `/api/webhooks/:id` | Update a webhook |
-| `DELETE` | `/api/webhooks/:id` | Delete a webhook |
-| `POST` | `/api/webhooks/:id/test` | Send a test event to a webhook |
+| Method | Path | Auth | Description |
+|---|---|:---:|---|
+| `GET` | `/health` | — | Liveness check — 200 if the process is running |
+| `GET` | `/ready` | — | Readiness check — 503 if DB or storage is unavailable |
+| `GET` | `/api/stats` | ✓ | Aggregated dashboard statistics |
+| `GET` | `/api/definitions` | ✓ | List all ISO definitions |
+| `POST` | `/api/definitions` | ✓ | Create a definition |
+| `GET` | `/api/definitions/:id` | ✓ | Get a single definition |
+| `PATCH` | `/api/definitions/:id` | ✓ | Update a definition |
+| `DELETE` | `/api/definitions/:id` | ✓ | Delete a definition |
+| `GET` | `/api/definitions/:id/versions` | ✓ | List versions for a definition |
+| `GET` | `/api/versions` | ✓ | Cross-definition version query (`?status=archived`) |
+| `GET` | `/api/versions/:id/download` | ✓ | Stream the ISO file |
+| `GET` | `/api/versions/:id/verify` | ✓ | Re-verify checksum on disk |
+| `PATCH` | `/api/versions/:id/archive` | ✓ | Archive a version |
+| `PATCH` | `/api/versions/:id/activate` | ✓ | Restore an archived version |
+| `DELETE` | `/api/versions/:id` | ✓ | Permanently delete version and file |
+| `GET` | `/api/downloads` | ✓ | List active and queued jobs |
+| `POST` | `/api/downloads` | ✓ | Trigger a manual download |
+| `DELETE` | `/api/downloads/:id` | ✓ | Cancel a download |
+| `GET` | `/api/audit` | ✓ | Audit log (`?severity=warn&eventType=download.failed`) |
+| `GET` | `/api/settings` | ✓ | List all runtime settings |
+| `PUT` | `/api/settings/:key` | ✓ | Update a runtime setting |
+| `GET` | `/api/storage/stats` | ✓ | Disk usage for the ISO store |
+| `GET` | `/api/webhooks` | ✓ | List webhooks |
+| `POST` | `/api/webhooks` | ✓ | Register a webhook |
+| `PATCH` | `/api/webhooks/:id` | ✓ | Update a webhook |
+| `DELETE` | `/api/webhooks/:id` | ✓ | Delete a webhook |
+| `POST` | `/api/webhooks/:id/test` | ✓ | Send a test event |
 
 </details>
 
 <details>
-<summary>Paginated responses</summary>
+<summary>Pagination</summary>
 
-Endpoints that return lists support `?page=1&limit=50` and respond with:
+List endpoints accept `?page=1&limit=50` and respond with:
 
 ```json
 {
-  "data": [...],
+  "data": [],
   "total": 142,
   "page": 1,
   "limit": 50
@@ -292,14 +279,14 @@ Endpoints that return lists support `?page=1&limit=50` and respond with:
 </details>
 
 <details>
-<summary>Error response shape (RFC 7807)</summary>
+<summary>Error shape (RFC 7807)</summary>
 
 ```json
 {
   "type": "https://httpstatuses.com/404",
   "title": "Not Found",
   "status": 404,
-  "detail": "ISO definition abc123 does not exist",
+  "detail": "ISO definition abc-123 does not exist",
   "requestId": "req-7f3a1b2c"
 }
 ```
@@ -310,55 +297,53 @@ Endpoints that return lists support `?page=1&limit=50` and respond with:
 
 ## Webhooks
 
-IsoVault fires webhook `POST` requests when key events occur. Each payload is delivered with an `X-IsoVault-Signature` header when a secret is configured.
+IsoVault delivers signed `POST` requests when key events occur. Payloads include an `X-IsoVault-Signature` header when a secret is configured on the webhook.
 
-### Signed header
+### Signature header
 
-```http
+```
 X-IsoVault-Signature: sha256=<hex-digest>
 ```
 
-Verify in your receiver before processing:
+Verify the signature before processing the payload:
 
 ```python
 import hashlib, hmac
 
-def verify_signature(secret: str, body: bytes, header: str) -> bool:
-    expected = "sha256=" + hmac.new(
-        secret.encode(), body, hashlib.sha256
-    ).hexdigest()
+def verify(secret: str, body: bytes, header: str) -> bool:
+    expected = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, header)
 ```
 
 ```typescript
 import { createHmac, timingSafeEqual } from "crypto";
 
-function verifySignature(secret: string, body: Buffer, header: string): boolean {
+function verify(secret: string, body: Buffer, header: string): boolean {
   const expected = "sha256=" + createHmac("sha256", secret).update(body).digest("hex");
   return timingSafeEqual(Buffer.from(expected), Buffer.from(header));
 }
 ```
 
-### Webhook events
+### Events
 
 | Event | Fired when |
-|-------|-----------|
-| `download.progress` | Ongoing — includes bytes, speed, and ETA |
-| `download.completed` | ISO fully written and verified |
-| `download.failed` | All retries exhausted |
-| `download.cancelled` | Job cancelled via API |
-| `version.detected` | Watcher finds a previously-unseen version string |
+|---|---|
+| `download.progress` | Download in progress — includes bytes transferred, speed, and ETA |
+| `download.completed` | ISO fully written and checksum verified |
+| `download.failed` | All retry attempts exhausted |
+| `download.cancelled` | Job cancelled via the API |
+| `version.detected` | Watcher finds a version string not previously seen |
 | `integrity.failed` | Checksum mismatch on a downloaded file |
-| `retention.applied` | Retention policy archived or deleted versions |
+| `retention.applied` | Retention policy archived or deleted one or more versions |
 
-Register a webhook with specific event filters:
+### Registering a webhook
 
 ```bash
-curl -X POST http://localhost:3721/api/webhooks \
+curl -sX POST http://localhost:3721/api/webhooks \
   -H "Authorization: Bearer $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://your-server.example.com/hooks/isovault",
+    "url":    "https://your-server.example.com/hooks/isovault",
     "secret": "your-webhook-secret",
     "events": ["download.completed", "integrity.failed", "version.detected"]
   }'
@@ -368,42 +353,41 @@ curl -X POST http://localhost:3721/api/webhooks \
 
 ## Backups
 
-SQLite is backed up daily at **2 AM** via the configured cron (`scheduler.db_backup_cron`). Backups are written alongside the database as:
+SQLite is backed up daily at **2 AM** (configurable via `scheduler.db_backup_cron`). Backup files are written alongside the database:
 
 ```
 iso-manager-YYYYMMDD-HHmmss.sqlite3
 ```
 
-The last **7 backups** are kept; older ones are purged automatically. No external tooling required.
+The last **7 backups** are kept automatically. No external tooling required.
 
 ---
 
 ## Development
 
 ```bash
-npm run dev        # backend :3721 + frontend :5173 with live reload
-npm run build      # compile both packages for production
-npm test           # backend unit tests (Jest)
-npm run typecheck  # TypeScript check across all packages
+npm run dev        # Backend on :3721 + Vite dev server on :5173, with live reload
+npm run build      # Compile both packages for production
+npm test           # Backend unit tests (Jest)
+npm run typecheck  # TypeScript across all packages
 npm run lint       # ESLint across all packages
 ```
 
-| Package | Path | Description |
-|---------|------|-------------|
-| `@isovault/backend` | `packages/backend/` | Fastify API, watcher engine, scheduler, SQLite |
-| `@isovault/frontend` | `packages/frontend/` | React + Vite + Tailwind dashboard |
-| `@isovault/e2e` | `packages/e2e/` | End-to-end tests |
+| Package | Path | Stack |
+|---|---|---|
+| `@isovault/backend` | `packages/backend/` | Fastify · better-sqlite3 · node-cron · TypeScript |
+| `@isovault/frontend` | `packages/frontend/` | React 18 · Vite · Tailwind CSS · TypeScript |
+| `@isovault/e2e` | `packages/e2e/` | End-to-end test suite |
 
 ---
 
 ## Contributing
 
-Pull requests are welcome. For significant changes, open an issue first to discuss the approach.
+Pull requests are welcome. For significant changes, open an issue first.
 
 ```bash
-git clone https://github.com/owner/isovault.git
-cd isovault
-npm install
+git clone https://github.com/24Skater/isovault.git
+cd isovault && npm install
 npm run dev
 npm test
 ```

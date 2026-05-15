@@ -48,7 +48,16 @@
       "Bash(git commit -m 'fix: restore backend node_modules copy in Docker build stage *)",
       "PowerShell(head)",
       "Edit(~/.claude/skills/readme-expert/**)",
-      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\ramos\\\\.claude\\\\skills\\\\\" | Where-Object { $_.Name -eq \"readme-expert\" } | Format-Table Name, LastWriteTime)"
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\ramos\\\\.claude\\\\skills\\\\\" | Where-Object { $_.Name -eq \"readme-expert\" } | Format-Table Name, LastWriteTime)",
+      "Bash(curl -s http://localhost:3721/health)",
+      "mcp__plugin_ecc_playwright__browser_resize",
+      "PowerShell(& \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\node_modules\\\\.bin\\\\playwright\" --version 2>&1)",
+      "Read(//c/Users/ramos/GitHub/isovault/packages/e2e/node_modules/**)",
+      "Read(//c/Users/ramos/AppData/Local/ms-playwright/**)",
+      "Bash(node node_modules/playwright/cli.js install chromium)",
+      "Read(//c/Users/ramos/.cache/**)",
+      "Read(//root/.cache/**)",
+      "Bash(node screenshot.mjs)"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills"

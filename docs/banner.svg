@@ -1,0 +1,122 @@
+<svg width="1200" height="280" viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.9" fill="#111c2e"/>
+    </pattern>
+    <radialGradient id="glowLeft" cx="15%" cy="50%" r="45%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#060c18" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowRight" cx="88%" cy="50%" r="38%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#0e3266" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#060c18" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="bannerClip">
+      <rect width="1200" height="280" rx="0"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="280" fill="#060c18"/>
+  <rect width="1200" height="280" fill="url(#dots)"/>
+  <rect width="1200" height="280" fill="url(#glowLeft)"/>
+  <rect width="1200" height="280" fill="url(#glowRight)"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1200" height="2.5" fill="#2563eb" opacity="0.9"/>
+
+  <!-- ─── Logo Mark — flat-top hexagon R=58, center (118, 140) ─── -->
+  <!-- Outer hex: 0°(176,140) 60°(147,190.3) 120°(89,190.3) 180°(60,140) 240°(89,89.7) 300°(147,89.7) -->
+  <polygon points="176,140 147,190.3 89,190.3 60,140 89,89.7 147,89.7"
+           fill="#07101f" stroke="#1d4ed8" stroke-width="2.5"/>
+  <!-- Inner hex: R=42 -->
+  <!-- 0°(160,140) 60°(139,176.4) 120°(97,176.4) 180°(76,140) 240°(97,103.6) 300°(139,103.6) -->
+  <polygon points="160,140 139,176.4 97,176.4 76,140 97,103.6 139,103.6"
+           fill="none" stroke="#1e3a7a" stroke-width="1" opacity="0.7"/>
+
+  <!-- Spoke lines (vault-door feel) -->
+  <line x1="118" y1="140" x2="176" y2="140" stroke="#122248" stroke-width="1"/>
+  <line x1="118" y1="140" x2="147" y2="89.7" stroke="#122248" stroke-width="1"/>
+  <line x1="118" y1="140" x2="89" y2="89.7" stroke="#122248" stroke-width="1"/>
+  <line x1="118" y1="140" x2="60" y2="140" stroke="#122248" stroke-width="1"/>
+  <line x1="118" y1="140" x2="89" y2="190.3" stroke="#122248" stroke-width="1"/>
+  <line x1="118" y1="140" x2="147" y2="190.3" stroke="#122248" stroke-width="1"/>
+
+  <!-- Lock body: x=94, y=146, w=48, h=32, rx=4 -->
+  <rect x="94" y="148" width="48" height="32" rx="4"
+        fill="#060c18" stroke="#3b82f6" stroke-width="2.5"/>
+  <!-- Lock shackle: entry at (102,148) and (130,148), rise to y=131, arc r=14 -->
+  <path d="M 102 148 L 102 133 A 16 16 0 0 1 134 133 L 134 148"
+        fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Keyhole circle -->
+  <circle cx="118" cy="161" r="5.5" fill="#2563eb"/>
+  <!-- Keyhole slot -->
+  <rect x="115.5" y="161" width="5" height="9" rx="2.5" fill="#2563eb"/>
+
+  <!-- ─── Wordmark ─── -->
+  <text x="212" y="126"
+        font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="76" font-weight="700" fill="#f0f4ff" letter-spacing="-3">IsoVault</text>
+
+  <!-- Tagline -->
+  <text x="215" y="168"
+        font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="19" font-weight="400" fill="#4a607d" letter-spacing="0.3">
+    Self-hosted ISO lifecycle management
+  </text>
+
+  <!-- Separator -->
+  <line x1="215" y1="190" x2="760" y2="190" stroke="#132035" stroke-width="1"/>
+
+  <!-- Feature chips -->
+  <rect x="215" y="203" width="158" height="25" rx="12.5" fill="#080f1e" stroke="#1a3358" stroke-width="1"/>
+  <text x="294" y="220"
+        font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="11" font-weight="500" fill="#4d7fc4" text-anchor="middle" letter-spacing="0.3">
+    5 watch strategies
+  </text>
+
+  <rect x="383" y="203" width="190" height="25" rx="12.5" fill="#080f1e" stroke="#1a3358" stroke-width="1"/>
+  <text x="478" y="220"
+        font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="11" font-weight="500" fill="#4d7fc4" text-anchor="middle" letter-spacing="0.3">
+    SHA-256 · SHA-512 · MD5
+  </text>
+
+  <rect x="583" y="203" width="182" height="25" rx="12.5" fill="#080f1e" stroke="#1a3358" stroke-width="1"/>
+  <text x="674" y="220"
+        font-family="system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="11" font-weight="500" fill="#4d7fc4" text-anchor="middle" letter-spacing="0.3">
+    HMAC-signed webhooks
+  </text>
+
+  <!-- ─── Right side: vault door decoration (very subtle) ─── -->
+  <!-- Outer ring -->
+  <circle cx="1048" cy="140" r="116" fill="none" stroke="#0c1d36" stroke-width="1.5"/>
+  <!-- Mid ring -->
+  <circle cx="1048" cy="140" r="88" fill="none" stroke="#0d2040" stroke-width="1.5"/>
+  <!-- Inner ring -->
+  <circle cx="1048" cy="140" r="60" fill="none" stroke="#0e2244" stroke-width="1"/>
+  <!-- Core disc -->
+  <circle cx="1048" cy="140" r="32" fill="#07101f" stroke="#142d56" stroke-width="1.5"/>
+
+  <!-- 6 vault bolts on mid-ring r=88 -->
+  <!-- 0°(1136,140) 60°(1092,216.3) 120°(1004,216.3) 180°(960,140) 240°(1004,63.7) 300°(1092,63.7) -->
+  <circle cx="1136" cy="140" r="7.5" fill="#060e1c" stroke="#142d56" stroke-width="1.5"/>
+  <circle cx="1092" cy="216.3" r="7.5" fill="#060e1c" stroke="#142d56" stroke-width="1.5"/>
+  <circle cx="1004" cy="216.3" r="7.5" fill="#060e1c" stroke="#142d56" stroke-width="1.5"/>
+  <circle cx="960"  cy="140" r="7.5" fill="#060e1c" stroke="#142d56" stroke-width="1.5"/>
+  <circle cx="1004" cy="63.7" r="7.5" fill="#060e1c" stroke="#142d56" stroke-width="1.5"/>
+  <circle cx="1092" cy="63.7" r="7.5" fill="#060e1c" stroke="#142d56" stroke-width="1.5"/>
+
+  <!-- Handle cross in center disc -->
+  <line x1="1031" y1="140" x2="1065" y2="140" stroke="#1a3a6e" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="1048" y1="123" x2="1048" y2="157" stroke="#1a3a6e" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="1048" cy="140" r="7" fill="none" stroke="#1e4380" stroke-width="1.5"/>
+
+  <!-- Subtle vertical separator between content and vault -->
+  <line x1="830" y1="40" x2="830" y2="240" stroke="#0d1e36" stroke-width="1"/>
+
+  <!-- Bottom border -->
+  <rect x="0" y="277" width="1200" height="3" fill="#0a1428"/>
+</svg>
