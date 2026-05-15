@@ -200,7 +200,10 @@ export function updateDefinition(id: string, dto: UpdateDefinitionDto): IsoDefin
     }
   }
 
-  const now = new Date().toISOString();
+  // Guarantee updatedAt is strictly after createdAt even on fast hardware
+  const now = new Date(
+    Math.max(Date.now(), new Date(current.updatedAt).getTime() + 1),
+  ).toISOString();
 
   const watchConfig =
     dto.watchConfig !== undefined

@@ -13,7 +13,19 @@
       "Bash(node_modules/.bin/tsc.cmd --noEmit --project packages/frontend/tsconfig.json)",
       "Bash(node_modules/.bin/jest.cmd --testPathPattern=\"packages/backend/src/__tests__\" --passWithNoTests)",
       "Bash(node --experimental-vm-modules node_modules/.bin/jest.cmd --project packages/backend --passWithNoTests)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(dir \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\")",
+      "Bash(dir \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\workers\")",
+      "Bash(dir \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\websocket\")",
+      "Bash(dir \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\scheduler\")",
+      "Bash(dir \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\watchers\")",
+      "Bash(dir \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\utils\")",
+      "Bash(Get-ChildItem -Recurse \"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\workers\",\"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\websocket\",\"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\scheduler\",\"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\watchers\",\"C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\utils\")",
+      "Bash(Select-Object FullName,Length)",
+      "Bash(find \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/workers\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/websocket\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/scheduler\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/watchers\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/utils\" -type f 2>/dev/null)",
+      "Read(//mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/**)",
+      "PowerShell(New-Item -ItemType Directory -Force C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\scheduler)",
+      "Bash(npm run *)"
     ]
   }
 }

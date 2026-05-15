@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import websocketPlugin from '@fastify/websocket';
 import path from 'path';
 import os from 'os';
 import config from './config';
@@ -7,6 +8,10 @@ import { initDb } from './db/client';
 import { healthRoutes } from './routes/health';
 import { definitionRoutes } from './routes/definitions';
 import { versionRoutes } from './routes/versions';
+import { downloadRoutes } from './routes/downloads';
+import { downloadManager } from './services/download';
+import { scheduler } from './scheduler/cron';
+import { watcherRoutes } from './routes/watchers';
 import { IsoManagerError } from './errors/base';
 
 // ─── Build server ─────────────────────────────────────────────────────────────
@@ -44,6 +49,8 @@ export async function buildServer(): Promise<FastifyInstance> {
     credentials: true,
   });
 
+  await server.register(websocketPlugin);
+
   // Serve frontend static files in production
   if (!isDev) {
     const staticPlugin = await import('@fastify/static');
@@ -58,6 +65,8 @@ export async function buildServer(): Promise<FastifyInstance> {
   await server.register(healthRoutes);
   await server.register(definitionRoutes);
   await server.register(versionRoutes);
+  await server.register(downloadRoutes);
+  await server.register(watcherRoutes);
 
   // ── Global error handler (RFC 7807) ─────────────────────────────────────────
 
@@ -103,6 +112,8 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   server.addHook('onClose', (_instance, done) => {
     const { closeDb } = require('./db/client') as typeof import('./db/client');
+    downloadManager.stopPolling();
+    scheduler.stop();
     closeDb();
     done();
   });
@@ -121,6 +132,10 @@ async function start(): Promise<void> {
     console.error('[db] Failed to initialise database:', err);
     process.exit(1);
   }
+
+  downloadManager.recoverStaleJobs();
+  downloadManager.startPolling();
+  scheduler.start();
 
   const server = await buildServer();
 

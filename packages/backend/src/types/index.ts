@@ -167,4 +167,65 @@ export interface WsDownloadFailedEvent {
   timestamp: string;
 }
 
-export type WsEvent = WsDownloadProgressEvent | WsDownloadCompletedEvent | WsDownloadFailedEvent;
+export interface WsVersionDetectedEvent {
+  type: 'version.detected';
+  definitionId: string;
+  versionString: string;
+  downloadUrl: string;
+  timestamp: string;
+}
+
+export interface WsRetentionAppliedEvent {
+  type: 'retention.applied';
+  definitionId: string;
+  behavior: RetentionBehavior;
+  affectedVersionIds: string[];
+  timestamp: string;
+}
+
+export type WsEvent =
+  | WsDownloadProgressEvent
+  | WsDownloadCompletedEvent
+  | WsDownloadFailedEvent
+  | WsVersionDetectedEvent
+  | WsRetentionAppliedEvent;
+
+// ─── Watcher types ────────────────────────────────────────────────────────────
+
+export interface WatchResult {
+  versionString: string;
+  downloadUrl: string;
+  releaseDate?: string | null;
+  checksum?: string | null;
+}
+
+export interface RssWatchConfig {
+  feedUrl: string;
+  versionRegex?: string;
+}
+
+export interface HtmlScrapeWatchConfig {
+  pageUrl: string;
+  versionSelector: string;
+  downloadLinkSelector: string;
+  versionRegex?: string;
+}
+
+export interface JsonApiWatchConfig {
+  apiUrl: string;
+  versionPath: string;
+  downloadUrlPath: string;
+  headers?: Record<string, string>;
+}
+
+export interface ChecksumWatchConfig {
+  checksumUrl: string;
+  downloadUrl: string;
+  algorithm: ChecksumAlgorithm;
+}
+
+export interface FilenameWatchConfig {
+  indexUrl: string;
+  filenameRegex: string;
+  downloadUrlTemplate: string;
+}
