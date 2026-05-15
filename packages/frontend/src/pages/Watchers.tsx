@@ -8,53 +8,34 @@ import { useDownloadProgress } from '../hooks/useDownloadProgress';
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
-  return new Date(iso).toLocaleString(undefined, {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  });
+  return new Date(iso).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
 }
 
 function strategyLabel(s: WatchStrategy | null): string {
   if (!s) return '—';
   const labels: Record<WatchStrategy, string> = {
-    rss: 'RSS',
-    html_scrape: 'HTML Scrape',
-    json_api: 'JSON API',
-    checksum: 'Checksum',
-    filename: 'Filename',
+    rss: 'RSS', html_scrape: 'HTML', json_api: 'JSON', checksum: 'Checksum', filename: 'Filename',
   };
   return labels[s] ?? s;
 }
 
 // ─── Strategy badge ───────────────────────────────────────────────────────────
 
+const STRATEGY_COLOR: Record<WatchStrategy, string> = {
+  rss:         'var(--color-warning)',
+  html_scrape: 'var(--accent)',
+  json_api:    'var(--color-success)',
+  checksum:    'var(--text-secondary)',
+  filename:    'var(--color-error)',
+};
+
 function StrategyBadge({ strategy }: { strategy: WatchStrategy | null }) {
-  if (!strategy) return <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>none</span>;
-
-  const colors: Record<WatchStrategy, { bg: string; color: string }> = {
-    rss:        { bg: 'var(--color-warning-subtle)',  color: 'var(--color-warning)'  },
-    html_scrape:{ bg: 'var(--accent-subtle)',         color: 'var(--accent)'         },
-    json_api:   { bg: 'var(--color-success-subtle)',  color: 'var(--color-success)'  },
-    checksum:   { bg: 'var(--bg-elevated)',           color: 'var(--text-secondary)' },
-    filename:   { bg: 'var(--color-error-subtle)',    color: 'var(--color-error)'    },
-  };
-
-  const { bg, color } = colors[strategy] ?? colors.rss;
-
+  if (!strategy) {
+    return <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>none</span>;
+  }
+  const color = STRATEGY_COLOR[strategy] ?? 'var(--text-muted)';
   return (
-    <span
-      style={{
-        background: bg,
-        color,
-        fontSize: 11,
-        fontWeight: 600,
-        padding: '2px 7px',
-        borderRadius: 'var(--radius-sm)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.04em',
-        whiteSpace: 'nowrap',
-      }}
-    >
+    <span className="badge" style={{ border: `1px solid ${color}`, color }}>
       {strategyLabel(strategy)}
     </span>
   );
@@ -71,81 +52,59 @@ interface WatcherRowProps {
 
 function WatcherRow({ def, isTriggering, recentDetection, onTrigger }: WatcherRowProps) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr auto auto auto auto',
-        alignItems: 'center',
-        gap: 16,
-        padding: '12px 16px',
-        borderBottom: '1px solid var(--border-subtle)',
-        flexWrap: 'wrap',
-      }}
-    >
-      {/* Name + family */}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr auto auto auto auto',
+      alignItems: 'center',
+      gap: 16,
+      padding: '12px 16px',
+      borderBottom: '1px solid var(--border-subtle)',
+    }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-        <span
-          style={{
-            fontWeight: 600,
-            fontSize: 14,
-            color: 'var(--text-primary)',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
+        <span style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {def.name}
         </span>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
           {def.family} · every {def.watchIntervalMinutes} min
         </span>
         {recentDetection && (
-          <span style={{ fontSize: 11, color: 'var(--color-success)', marginTop: 2 }}>
-            New version detected: {recentDetection.versionString}
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--color-success)', marginTop: 2 }}>
+            ↑ {recentDetection.versionString}
           </span>
         )}
       </div>
 
-      {/* Strategy badge */}
       <StrategyBadge strategy={def.watchStrategy} />
 
-      {/* Last checked */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'right' }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Last checked</span>
-        <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Checked</span>
+        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
           {formatDate(def.watchLastCheckedAt)}
         </span>
       </div>
 
-      {/* Last version found */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'right' }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Last version</span>
-        <span
-          style={{
-            fontSize: 12,
-            color: 'var(--text-secondary)',
-            fontFamily: 'monospace',
-            whiteSpace: 'nowrap',
-          }}
-        >
+        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Version</span>
+        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
           {def.watchLastVersionFound ?? '—'}
         </span>
       </div>
 
-      {/* Trigger button */}
       <button
         onClick={() => onTrigger(def.id)}
         disabled={isTriggering}
         style={{
-          background: isTriggering ? 'var(--bg-elevated)' : 'var(--accent-subtle)',
+          background: 'transparent',
           color: isTriggering ? 'var(--text-muted)' : 'var(--accent)',
-          border: 'none',
-          borderRadius: 'var(--radius-sm)',
-          padding: '5px 14px',
-          fontSize: 12,
-          fontWeight: 600,
+          border: `1px solid ${isTriggering ? 'var(--border-strong)' : 'var(--accent)'}`,
+          padding: '5px 12px',
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 10,
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em',
           cursor: isTriggering ? 'default' : 'pointer',
           whiteSpace: 'nowrap',
+          opacity: isTriggering ? 0.6 : 1,
         }}
       >
         {isTriggering ? 'Checking…' : 'Check now'}
@@ -180,14 +139,11 @@ export default function Watchers() {
     return () => clearInterval(interval);
   }, [loadWatchers]);
 
-  // Listen for version.detected events via the shared WS connection
   const { connected } = useDownloadProgress({
     onVersionDetected: useCallback(
       (event: WsVersionDetectedEvent) => {
         setDetections((prev) => ({ ...prev, [event.definitionId]: event }));
-        // Reload so last-checked / last-version columns update
         void loadWatchers();
-        // Clear the highlight after 10 seconds
         setTimeout(() => {
           setDetections((prev) => {
             const next = { ...prev };
@@ -218,97 +174,80 @@ export default function Watchers() {
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: 1000 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)' }}>Watchers</h1>
-        <span
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: connected ? 'var(--color-success)' : 'var(--color-warning)',
-            display: 'inline-block',
-          }}
-          title={connected ? 'Live updates connected' : 'Reconnecting…'}
-        />
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+        <h1 style={{
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          color: 'var(--text-secondary)',
+        }}>
+          Watchers
+          <span style={{ marginLeft: 12, color: 'var(--text-muted)', fontWeight: 400 }}>
+            {watchers.length}
+          </span>
+        </h1>
+        <span style={{
+          width: 6,
+          height: 6,
+          background: connected ? 'var(--color-success)' : 'var(--color-warning)',
+          display: 'inline-block',
+          flexShrink: 0,
+        }} title={connected ? 'Live updates connected' : 'Reconnecting…'} />
+        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
           {connected ? 'live' : 'connecting…'}
         </span>
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
-          {watchers.length} watcher{watchers.length !== 1 ? 's' : ''}
-        </span>
       </div>
+      <div className="page-rule" />
 
-      {/* Error banner */}
       {error && (
-        <div
-          style={{
-            background: 'var(--color-error-subtle)',
-            color: 'var(--color-error)',
-            borderRadius: 'var(--radius-md)',
-            padding: '10px 14px',
-            marginBottom: 16,
-            fontSize: 13,
-          }}
-        >
+        <div style={{
+          background: 'var(--color-error-subtle)',
+          border: '1px solid var(--color-error)',
+          color: 'var(--color-error)',
+          padding: '8px 12px',
+          marginBottom: 16,
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 11,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
           {error}
-          <button
-            onClick={() => setError(null)}
-            style={{
-              marginLeft: 12,
-              background: 'none',
-              border: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
-            ×
-          </button>
+          <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}>×</button>
         </div>
       )}
 
-      {/* Table */}
-      <div
-        style={{
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-md)',
-          overflow: 'hidden',
-        }}
-      >
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
         {/* Column headers */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto auto auto auto',
-            gap: 16,
-            padding: '8px 16px',
-            borderBottom: '1px solid var(--border-subtle)',
-            background: 'var(--bg-elevated)',
-          }}
-        >
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto auto auto auto',
+          gap: 16,
+          padding: '8px 16px',
+          borderBottom: '1px solid var(--border-default)',
+          background: 'var(--bg-elevated)',
+        }}>
           {['Definition', 'Strategy', 'Last Checked', 'Last Version', ''].map((label) => (
-            <span
-              key={label}
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                textAlign: label === 'Last Checked' || label === 'Last Version' ? 'right' : 'left',
-              }}
-            >
+            <span key={label} style={{
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: 10,
+              fontWeight: 600,
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              textAlign: label === 'Last Checked' || label === 'Last Version' ? 'right' : 'left',
+            }}>
               {label}
             </span>
           ))}
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, padding: 16 }}>Loading…</p>
+          <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11, padding: 16 }}>Loading…</p>
         ) : watchers.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, padding: 16 }}>
+          <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11, padding: 16 }}>
             No watch-enabled definitions. Enable watching on a definition in the Catalog.
           </p>
         ) : (

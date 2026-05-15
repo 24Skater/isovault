@@ -14,22 +14,28 @@ import {
 } from '../api/definitions';
 import VersionTimeline from '../components/VersionTimeline';
 
+// ─── Shared input style ───────────────────────────────────────────────────────
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '7px 10px',
+  background: 'var(--bg-input)',
+  border: '1px solid var(--border-default)',
+  color: 'var(--text-primary)',
+  fontFamily: 'inherit',
+  fontSize: 12,
+  outline: 'none',
+};
+
 // ─── Watch badge ──────────────────────────────────────────────────────────────
 
 function WatchBadge({ enabled }: { enabled: boolean }) {
   return (
-    <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-      style={
-        enabled
-          ? { background: 'var(--color-success-subtle)', color: 'var(--color-success)' }
-          : { background: 'var(--bg-hover)', color: 'var(--text-muted)' }
-      }
-    >
-      <span
-        className="w-1.5 h-1.5 rounded-full"
-        style={{ background: enabled ? 'var(--color-success)' : 'var(--text-muted)' }}
-      />
+    <span className="badge" style={
+      enabled
+        ? { border: '1px solid var(--color-success)', color: 'var(--color-success)' }
+        : { border: '1px solid var(--border-strong)', color: 'var(--text-muted)' }
+    }>
       {enabled ? 'Watching' : 'Manual'}
     </span>
   );
@@ -37,47 +43,65 @@ function WatchBadge({ enabled }: { enabled: boolean }) {
 
 // ─── Confirm delete dialog ────────────────────────────────────────────────────
 
-function ConfirmDialog({
-  name,
-  onConfirm,
-  onCancel,
-}: {
+function ConfirmDialog({ name, onConfirm, onCancel }: {
   name: string;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(0,0,0,0.7)',
+      }}
     >
-      <div
-        className="rounded-xl p-6 w-full max-w-sm shadow-2xl"
-        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-      >
-        <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Delete definition
-        </h3>
-        <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>
-          Delete{' '}
-          <strong style={{ color: 'var(--text-primary)' }}>{name}</strong>? This cannot be undone.
+      <div style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-default)',
+        padding: '24px',
+        width: '100%',
+        maxWidth: 360,
+      }}>
+        <div style={{
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 10,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.10em',
+          color: 'var(--color-error)',
+          marginBottom: 12,
+        }}>
+          Delete Definition
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
+          Delete <strong style={{ color: 'var(--text-primary)' }}>{name}</strong>? This cannot be undone.
         </p>
-        <div className="flex gap-3 justify-end">
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button
-            className="px-3 py-1.5 rounded-lg text-sm"
-            style={{
-              background: 'var(--bg-hover)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
-            }}
             onClick={onCancel}
+            style={{
+              padding: '6px 14px',
+              background: 'transparent',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-default)',
+              fontSize: 12,
+              cursor: 'pointer',
+            }}
           >
             Cancel
           </button>
           <button
-            className="px-3 py-1.5 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--color-error)', color: '#fff' }}
             onClick={onConfirm}
+            style={{
+              padding: '6px 14px',
+              background: 'var(--color-error)',
+              color: '#fff',
+              border: 'none',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
           >
             Delete
           </button>
@@ -89,29 +113,27 @@ function ConfirmDialog({
 
 // ─── Form field wrapper ───────────────────────────────────────────────────────
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
+function Field({ label, hint, children }: {
   label: string;
   hint?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>
+      <label style={{
+        display: 'block',
+        fontFamily: 'ui-monospace, monospace',
+        fontSize: 10,
+        fontWeight: 600,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        color: 'var(--text-muted)',
+        marginBottom: 5,
+      }}>
         {label}
-        {hint && <span className="ml-1 font-normal opacity-60">{hint}</span>}
+        {hint && <span style={{ marginLeft: 6, fontWeight: 400, opacity: 0.7 }}>{hint}</span>}
       </label>
-      <div
-        className="[&>input]:w-full [&>textarea]:w-full [&>select]:w-full
-                   [&>input]:px-3 [&>input]:py-2 [&>input]:rounded-lg [&>input]:text-sm
-                   [&>textarea]:px-3 [&>textarea]:py-2 [&>textarea]:rounded-lg [&>textarea]:text-sm [&>textarea]:resize-none
-                   [&>select]:px-3 [&>select]:py-2 [&>select]:rounded-lg [&>select]:text-sm"
-      >
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
@@ -168,10 +190,7 @@ function formToDto(form: FormState): CreateDefinitionDto {
     family: form.family.trim().toLowerCase(),
     architecture: form.architecture.trim(),
     description: form.description.trim() || null,
-    tags: form.tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean),
+    tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
     sourceUrl: form.sourceUrl.trim() || null,
     checksumUrl: form.checksumUrl.trim() || null,
     checksumAlgo: form.checksumAlgo,
@@ -183,11 +202,7 @@ function formToDto(form: FormState): CreateDefinitionDto {
 
 // ─── Add / Edit modal ─────────────────────────────────────────────────────────
 
-function DefinitionModal({
-  editing,
-  onSave,
-  onClose,
-}: {
+function DefinitionModal({ editing, onSave, onClose }: {
   editing: IsoDefinition | null;
   onSave: (dto: CreateDefinitionDto | UpdateDefinitionDto) => Promise<void>;
   onClose: () => void;
@@ -224,64 +239,89 @@ function DefinitionModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-16 px-4"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        overflowY: 'auto',
+        padding: '64px 16px',
+        background: 'rgba(0,0,0,0.7)',
+      }}
       onClick={handleBackdropClick}
     >
       <form
         onSubmit={(e) => void handleSubmit(e)}
-        className="w-full max-w-lg rounded-xl shadow-2xl p-6"
-        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+        style={{
+          width: '100%',
+          maxWidth: 520,
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          padding: '24px',
+        }}
       >
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-            {editing ? 'Edit definition' : 'Add definition'}
-          </h2>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 20,
+        }}>
+          <div style={{
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: 10,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            color: 'var(--accent)',
+          }}>
+            {editing ? 'Edit Definition' : 'Add Definition'}
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-lg leading-none"
-            style={{ color: 'var(--text-muted)' }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-muted)',
+              fontSize: 16,
+              cursor: 'pointer',
+              lineHeight: 1,
+            }}
           >
             ✕
           </button>
         </div>
 
         {error && (
-          <div
-            className="mb-4 px-3 py-2 rounded-lg text-sm"
-            style={{ background: 'var(--color-error-subtle)', color: 'var(--color-error)' }}
-          >
+          <div style={{
+            marginBottom: 16,
+            padding: '8px 12px',
+            background: 'var(--color-error-subtle)',
+            border: '1px solid var(--color-error)',
+            color: 'var(--color-error)',
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: 11,
+          }}>
             {error}
           </div>
         )}
 
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Field label="Name *">
             <input
               value={form.name}
               onChange={(e) => set('name', e.target.value)}
               placeholder="e.g. Ubuntu 24.04 LTS"
-              style={{
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
+              style={inputStyle}
               required
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="Family *">
               <input
                 value={form.family}
                 onChange={(e) => set('family', e.target.value)}
                 placeholder="ubuntu"
-                style={{
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
-                }}
+                style={inputStyle}
                 required
               />
             </Field>
@@ -289,11 +329,7 @@ function DefinitionModal({
               <select
                 value={form.architecture}
                 onChange={(e) => set('architecture', e.target.value)}
-                style={{
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
-                }}
+                style={inputStyle}
               >
                 <option>x86_64</option>
                 <option>aarch64</option>
@@ -309,11 +345,7 @@ function DefinitionModal({
               onChange={(e) => set('description', e.target.value)}
               placeholder="Optional notes"
               rows={2}
-              style={{
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
+              style={{ ...inputStyle, resize: 'none' }}
             />
           </Field>
 
@@ -322,11 +354,7 @@ function DefinitionModal({
               value={form.tags}
               onChange={(e) => set('tags', e.target.value)}
               placeholder="server, minimal, lts"
-              style={{
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
+              style={inputStyle}
             />
           </Field>
 
@@ -336,39 +364,25 @@ function DefinitionModal({
               value={form.sourceUrl}
               onChange={(e) => set('sourceUrl', e.target.value)}
               placeholder="https://releases.ubuntu.com/…"
-              style={{
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
+              style={inputStyle}
             />
           </Field>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
-              <Field label="Checksum URL">
-                <input
-                  type="url"
-                  value={form.checksumUrl}
-                  onChange={(e) => set('checksumUrl', e.target.value)}
-                  placeholder="https://…"
-                  style={{
-                    background: 'var(--bg-input)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-primary)',
-                  }}
-                />
-              </Field>
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12 }}>
+            <Field label="Checksum URL">
+              <input
+                type="url"
+                value={form.checksumUrl}
+                onChange={(e) => set('checksumUrl', e.target.value)}
+                placeholder="https://…"
+                style={inputStyle}
+              />
+            </Field>
             <Field label="Algorithm">
               <select
                 value={form.checksumAlgo}
                 onChange={(e) => set('checksumAlgo', e.target.value as ChecksumAlgorithm)}
-                style={{
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
-                }}
+                style={{ ...inputStyle, width: 'auto', minWidth: 90 }}
               >
                 <option value="sha256">SHA-256</option>
                 <option value="sha512">SHA-512</option>
@@ -377,7 +391,7 @@ function DefinitionModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label="Retain (versions)">
               <input
                 type="number"
@@ -385,22 +399,14 @@ function DefinitionModal({
                 max={99}
                 value={form.retentionCount}
                 onChange={(e) => set('retentionCount', parseInt(e.target.value, 10) || 1)}
-                style={{
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
-                }}
+                style={inputStyle}
               />
             </Field>
             <Field label="On excess">
               <select
                 value={form.retentionBehavior}
                 onChange={(e) => set('retentionBehavior', e.target.value as RetentionBehavior)}
-                style={{
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
-                }}
+                style={inputStyle}
               >
                 <option value="archive">Archive</option>
                 <option value="delete">Delete</option>
@@ -410,39 +416,57 @@ function DefinitionModal({
 
           {/* Watch toggle */}
           <div
-            className="flex items-center gap-3 cursor-pointer select-none"
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}
             onClick={() => set('watchEnabled', !form.watchEnabled)}
           >
-            <div
-              className="relative w-9 h-5 rounded-full transition-colors flex-shrink-0"
-              style={{ background: form.watchEnabled ? 'var(--accent)' : 'var(--bg-hover)' }}
-            >
-              <span
-                className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform"
-                style={{
-                  background: '#fff',
-                  transform: form.watchEnabled ? 'translateX(16px)' : 'translateX(0)',
-                }}
-              />
+            <div style={{
+              width: 28,
+              height: 16,
+              background: form.watchEnabled ? 'var(--accent)' : 'var(--border-strong)',
+              position: 'relative',
+              flexShrink: 0,
+              transition: 'background 120ms',
+            }}>
+              <span style={{
+                position: 'absolute',
+                top: 2,
+                left: form.watchEnabled ? 14 : 2,
+                width: 12,
+                height: 12,
+                background: form.watchEnabled ? '#080808' : 'var(--text-muted)',
+                transition: 'left 120ms',
+              }} />
             </div>
-            <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <span style={{
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: 11,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'var(--text-secondary)',
+            }}>
               Enable auto-watch
             </span>
           </div>
         </div>
 
-        <div
-          className="flex gap-3 justify-end mt-6 pt-4 border-t"
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
+        <div style={{
+          display: 'flex',
+          gap: 8,
+          justifyContent: 'flex-end',
+          marginTop: 20,
+          paddingTop: 16,
+          borderTop: '1px solid var(--border-subtle)',
+        }}>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-sm"
             style={{
-              background: 'var(--bg-hover)',
+              padding: '7px 16px',
+              background: 'transparent',
               color: 'var(--text-secondary)',
-              border: '1px solid var(--border-subtle)',
+              border: '1px solid var(--border-default)',
+              fontSize: 12,
+              cursor: 'pointer',
             }}
           >
             Cancel
@@ -450,10 +474,19 @@ function DefinitionModal({
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--accent)', color: '#fff', opacity: saving ? 0.7 : 1 }}
+            style={{
+              padding: '7px 16px',
+              background: 'var(--accent)',
+              color: '#080808',
+              border: 'none',
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              cursor: saving ? 'not-allowed' : 'pointer',
+              opacity: saving ? 0.7 : 1,
+            }}
           >
-            {saving ? 'Saving…' : editing ? 'Save changes' : 'Add definition'}
+            {saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Definition'}
           </button>
         </div>
       </form>
@@ -471,6 +504,18 @@ type ModalMode =
 
 const LIMIT = 20;
 
+const btnStyle: React.CSSProperties = {
+  padding: '4px 10px',
+  background: 'transparent',
+  color: 'var(--text-secondary)',
+  border: '1px solid var(--border-default)',
+  fontFamily: 'ui-monospace, monospace',
+  fontSize: 10,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  cursor: 'pointer',
+};
+
 export default function Catalog() {
   const [definitions, setDefinitions] = useState<IsoDefinition[]>([]);
   const [total, setTotal] = useState(0);
@@ -482,26 +527,18 @@ export default function Catalog() {
   const [modal, setModal] = useState<ModalMode>(null);
   const [confirmDelete, setConfirmDelete] = useState<IsoDefinition | null>(null);
 
-  // Debounce search input
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
     return () => clearTimeout(t);
   }, [search]);
 
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetchDefinitions({
-        search: debouncedSearch || undefined,
-        page,
-        limit: LIMIT,
-      });
+      const res = await fetchDefinitions({ search: debouncedSearch || undefined, page, limit: LIMIT });
       setDefinitions(res.data);
       setTotal(res.total);
     } catch (err) {
@@ -511,9 +548,7 @@ export default function Catalog() {
     }
   }, [debouncedSearch, page]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
   async function handleSave(dto: CreateDefinitionDto | UpdateDefinitionDto) {
     if (modal?.type === 'edit') {
@@ -533,70 +568,83 @@ export default function Catalog() {
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-            ISO Catalog
-          </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {total} definition{total !== 1 ? 's' : ''}
-          </p>
-        </div>
+    <div style={{ padding: '24px 32px', maxWidth: 1100 }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+        <h1 style={{
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          color: 'var(--text-secondary)',
+        }}>
+          ISO Catalog
+          <span style={{ marginLeft: 12, color: 'var(--text-muted)', fontWeight: 400 }}>
+            {total}
+          </span>
+        </h1>
         <button
-          className="px-4 py-2 rounded-lg text-sm font-medium"
-          style={{ background: 'var(--accent)', color: '#fff' }}
           onClick={() => setModal({ type: 'add' })}
+          style={{
+            padding: '6px 14px',
+            background: 'var(--accent)',
+            color: '#080808',
+            border: 'none',
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: 10,
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            cursor: 'pointer',
+          }}
         >
-          + Add definition
+          + Add Definition
         </button>
       </div>
+      <div className="page-rule" />
 
       {/* Search */}
-      <div className="mb-4">
+      <div style={{ marginBottom: 16 }}>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name or family…"
-          className="w-full max-w-sm px-3 py-2 rounded-lg text-sm"
-          style={{
-            background: 'var(--bg-input)',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-primary)',
-          }}
+          style={{ ...inputStyle, maxWidth: 320 }}
         />
       </div>
 
-      {/* Error banner */}
+      {/* Error */}
       {error && (
-        <div
-          className="mb-4 px-4 py-3 rounded-lg text-sm"
-          style={{ background: 'var(--color-error-subtle)', color: 'var(--color-error)' }}
-        >
+        <div style={{
+          marginBottom: 16,
+          padding: '8px 12px',
+          background: 'var(--color-error-subtle)',
+          border: '1px solid var(--color-error)',
+          color: 'var(--color-error)',
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 11,
+        }}>
           {error}
         </div>
       )}
 
       {/* Table */}
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{ border: '1px solid var(--border-default)' }}
-      >
-        <table className="w-full text-sm border-collapse">
+      <div style={{ border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
-            <tr
-              style={{
-                background: 'var(--bg-surface)',
-                borderBottom: '1px solid var(--border-default)',
-              }}
-            >
+            <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
               {['Name', 'Family', 'Architecture', 'Watch', 'Retention', ''].map((h) => (
-                <th
-                  key={h}
-                  className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wide"
-                  style={{ color: 'var(--text-muted)' }}
-                >
+                <th key={h} style={{
+                  textAlign: 'left',
+                  padding: '8px 16px',
+                  fontFamily: 'ui-monospace, monospace',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: 'var(--text-muted)',
+                }}>
                   {h}
                 </th>
               ))}
@@ -605,91 +653,48 @@ export default function Catalog() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-10 text-center text-sm"
-                  style={{ color: 'var(--text-muted)' }}
-                >
+                <td colSpan={6} style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
                   Loading…
                 </td>
               </tr>
             ) : definitions.length === 0 ? (
               <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-10 text-center text-sm"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {debouncedSearch
-                    ? 'No definitions match that search.'
-                    : 'No definitions yet. Add one to get started.'}
+                <td colSpan={6} style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
+                  {debouncedSearch ? 'No definitions match that search.' : 'No definitions yet. Add one to get started.'}
                 </td>
               </tr>
             ) : (
               definitions.map((def, i) => (
-                <tr
-                  key={def.id}
-                  style={{
-                    borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined,
-                    background: 'var(--bg-base)',
-                  }}
-                >
-                  <td className="px-4 py-3">
-                    <div className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {def.name}
-                    </div>
+                <tr key={def.id} style={{
+                  borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined,
+                  background: 'var(--bg-base)',
+                }}>
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{def.name}</div>
                     {def.description && (
-                      <div
-                        className="text-xs mt-0.5 truncate max-w-xs"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
+                      <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {def.description}
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
+                  <td style={{ padding: '10px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                     {def.family}
                   </td>
-                  <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
+                  <td style={{ padding: '10px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                     {def.architecture}
                   </td>
-                  <td className="px-4 py-3">
+                  <td style={{ padding: '10px 16px' }}>
                     <WatchBadge enabled={def.watchEnabled} />
                   </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <td style={{ padding: '10px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
                     keep {def.retentionCount} · {def.retentionBehavior}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2 justify-end">
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                      <button style={btnStyle} onClick={() => setModal({ type: 'versions', def })}>Versions</button>
+                      <button style={btnStyle} onClick={() => setModal({ type: 'edit', def })}>Edit</button>
                       <button
-                        className="px-2.5 py-1 rounded-md text-xs"
-                        style={{
-                          background: 'var(--bg-hover)',
-                          color: 'var(--text-secondary)',
-                          border: '1px solid var(--border-subtle)',
-                        }}
-                        onClick={() => setModal({ type: 'versions', def })}
-                      >
-                        Versions
-                      </button>
-                      <button
-                        className="px-2.5 py-1 rounded-md text-xs"
-                        style={{
-                          background: 'var(--bg-hover)',
-                          color: 'var(--text-secondary)',
-                          border: '1px solid var(--border-subtle)',
-                        }}
-                        onClick={() => setModal({ type: 'edit', def })}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="px-2.5 py-1 rounded-md text-xs"
-                        style={{
-                          background: 'var(--color-error-subtle)',
-                          color: 'var(--color-error)',
-                          border: '1px solid transparent',
-                        }}
+                        style={{ ...btnStyle, color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
                         onClick={() => setConfirmDelete(def)}
                       >
                         Delete
@@ -705,33 +710,15 @@ export default function Catalog() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
             Page {page} of {totalPages}
           </span>
-          <div className="flex gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-              className="px-3 py-1.5 rounded-lg text-xs disabled:opacity-40"
-              style={{
-                background: 'var(--bg-hover)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-subtle)',
-              }}
-            >
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} style={{ ...btnStyle, opacity: page <= 1 ? 0.4 : 1 }}>
               Previous
             </button>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-3 py-1.5 rounded-lg text-xs disabled:opacity-40"
-              style={{
-                background: 'var(--bg-hover)',
-                color: 'var(--text-secondary)',
-                border: '1px solid var(--border-subtle)',
-              }}
-            >
+            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} style={{ ...btnStyle, opacity: page >= totalPages ? 0.4 : 1 }}>
               Next
             </button>
           </div>
@@ -750,24 +737,35 @@ export default function Catalog() {
       {/* Versions panel */}
       {modal?.type === 'versions' && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-16 px-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setModal(null);
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50,
+            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+            overflowY: 'auto', padding: '64px 16px',
+            background: 'rgba(0,0,0,0.7)',
           }}
+          onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}
         >
-          <div
-            className="w-full max-w-2xl rounded-xl shadow-2xl p-6"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+          <div style={{
+            width: '100%',
+            maxWidth: 680,
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-default)',
+            padding: '24px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{
+                fontFamily: 'ui-monospace, monospace',
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.12em',
+                color: 'var(--accent)',
+              }}>
                 {modal.def.name} — Versions
-              </h2>
+              </div>
               <button
                 onClick={() => setModal(null)}
-                className="text-lg leading-none"
-                style={{ color: 'var(--text-muted)' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer' }}
               >
                 ✕
               </button>

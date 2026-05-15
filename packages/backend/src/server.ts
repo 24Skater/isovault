@@ -18,6 +18,7 @@ import { storageRoutes } from './routes/storage';
 import { webhookRoutes } from './routes/webhooks';
 import { statsRoutes } from './routes/stats';
 import { IsoManagerError } from './errors/base';
+import { initApiKey, verifyApiKey } from './services/auth';
 
 // ─── Build server ─────────────────────────────────────────────────────────────
 
@@ -64,6 +65,19 @@ export async function buildServer(): Promise<FastifyInstance> {
       prefix: '/',
     });
   }
+
+  // ── Auth hook ────────────────────────────────────────────────────────────────
+
+  const PUBLIC_PATHS = new Set(['/health', '/ready', '/api/health']);
+  server.addHook('onRequest', async (request, reply) => {
+    const pathname = request.url.split('?')[0];
+    if (PUBLIC_PATHS.has(pathname)) return;
+    const header = request.headers['authorization'] ?? '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    if (!token || !(await verifyApiKey(token))) {
+      return reply.status(401).send({ error: 'Unauthorized' });
+    }
+  });
 
   // ── Routes ───────────────────────────────────────────────────────────────────
 
@@ -133,6 +147,8 @@ export async function buildServer(): Promise<FastifyInstance> {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 
+let _runningServer: FastifyInstance | null = null;
+
 async function start(): Promise<void> {
   // Initialise database (runs migrations)
   try {
@@ -143,28 +159,29 @@ async function start(): Promise<void> {
     process.exit(1);
   }
 
+  await initApiKey();
+
   downloadManager.recoverStaleJobs();
   downloadManager.startPolling();
   scheduler.start();
 
-  const server = await buildServer();
+  _runningServer = await buildServer();
 
   try {
-    await server.listen({ port: config.server.port, host: config.server.host });
-    server.log.info(
+    await _runningServer.listen({ port: config.server.port, host: config.server.host });
+    _runningServer.log.info(
       { port: config.server.port, host: config.server.host },
       'isovault server started',
     );
   } catch (err) {
-    server.log.fatal(err, 'Failed to start server');
+    _runningServer.log.fatal(err, 'Failed to start server');
     process.exit(1);
   }
 }
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  const server = await buildServer();
-  await server.close();
+  if (_runningServer) await _runningServer.close();
   process.exit(0);
 });
 

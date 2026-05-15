@@ -1,10 +1,14 @@
 import type { FastifyInstance } from 'fastify';
+import fs from 'fs';
+import { pipeline } from 'stream/promises';
 import { listVersions, getVersion, rowToVersion } from '../services/iso';
 import { NotFoundError, ValidationError } from '../errors/base';
 import { getDb } from '../db/client';
 import type { IsoVersionRow, IsoDefinitionRow } from '../db/schema';
+import type { ChecksumAlgorithm } from '../types';
 import { logEvent } from '../services/audit';
 import { deleteFile } from '../services/storage';
+import { computeFileChecksum } from '../utils/checksum';
 
 export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
   // ── GET /api/definitions/:definitionId/versions ───────────────────────────
@@ -123,6 +127,84 @@ export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
     return rowToVersion(
       db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as IsoVersionRow,
     );
+  });
+
+  // ── GET /api/versions/:id/download ───────────────────────────────────────
+  fastify.get('/api/versions/:id/download', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const db = getDb();
+
+    const row = db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as
+      | IsoVersionRow
+      | undefined;
+    if (!row) throw new NotFoundError('IsoVersion', id);
+
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(row.file_path);
+    } catch {
+      throw new NotFoundError('IsoFile', row.file_path);
+    }
+
+    const safeFilename = row.filename.replace(/["\r\n]/g, '');
+    reply.raw.writeHead(200, {
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': `attachment; filename="${safeFilename}"`,
+      'Content-Length': String(stat.size),
+    });
+
+    const stream = fs.createReadStream(row.file_path);
+    try {
+      await pipeline(stream, reply.raw);
+    } catch (err) {
+      request.log.error({ err }, 'download.stream_error');
+      if (!reply.raw.writableEnded) {
+        reply.raw.destroy(err instanceof Error ? err : new Error(String(err)));
+      }
+    }
+  });
+
+  // ── GET /api/versions/:id/verify ─────────────────────────────────────────
+  fastify.get('/api/versions/:id/verify', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const db = getDb();
+
+    const row = db
+      .prepare(
+        `SELECT v.*, d.checksum_algo
+         FROM iso_versions v
+         JOIN iso_definitions d ON d.id = v.definition_id
+         WHERE v.id = ?`,
+      )
+      .get(id) as (IsoVersionRow & { checksum_algo: string }) | undefined;
+
+    if (!row) throw new NotFoundError('IsoVersion', id);
+
+    if (!fs.existsSync(row.file_path)) {
+      return reply.status(422).send({
+        type: 'https://isovault.local/errors/file_not_found',
+        title: 'FILE_NOT_FOUND',
+        status: 422,
+        detail: `ISO file not present on disk: ${row.file_path}`,
+        requestId: request.id,
+      });
+    }
+
+    const algo = row.checksum_algo as ChecksumAlgorithm;
+    const computed = await computeFileChecksum(row.file_path, algo);
+    const stored = row.checksum;
+    const verified = stored !== null && computed === stored.toLowerCase();
+    const checkedAt = new Date().toISOString();
+
+    logEvent(
+      verified ? 'checksum.verified' : 'checksum.mismatch',
+      'version',
+      id,
+      { stored, computed },
+      verified ? 'info' : 'error',
+    );
+
+    return { id, verified, stored, computed, checkedAt };
   });
 
   // ── DELETE /api/versions/:id ──────────────────────────────────────────────

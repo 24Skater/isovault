@@ -8,57 +8,71 @@ import AuditLog from './pages/AuditLog';
 import Settings from './pages/Settings';
 
 const navItems = [
-  { to: '/',         label: 'Dashboard' },
-  { to: '/catalog',  label: 'Catalog'   },
-  { to: '/downloads',label: 'Downloads' },
-  { to: '/watchers', label: 'Watchers'  },
-  { to: '/archive',  label: 'Archive'   },
-  { to: '/audit',    label: 'Audit Log' },
-  { to: '/settings', label: 'Settings'  },
+  { to: '/',          label: 'Dashboard' },
+  { to: '/catalog',   label: 'Catalog'   },
+  { to: '/downloads', label: 'Downloads' },
+  { to: '/watchers',  label: 'Watchers'  },
+  { to: '/archive',   label: 'Archive'   },
+  { to: '/audit',     label: 'Audit Log' },
+  { to: '/settings',  label: 'Settings'  },
 ];
 
 export default function App() {
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg-base)' }}>
       {/* Sidebar */}
-      <aside
-        className="flex flex-col w-56 flex-shrink-0 border-r"
-        style={{
-          background: 'var(--bg-surface)',
-          borderColor: 'var(--border-default)',
-        }}
-      >
+      <aside style={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: 180,
+        flexShrink: 0,
+        background: 'var(--bg-surface)',
+        borderRight: '1px solid var(--border-default)',
+      }}>
         {/* Brand */}
-        <div
-          className="flex items-center gap-2 px-5 py-4 border-b"
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
-          <span
-            className="text-base font-medium tracking-tight"
-            style={{ color: 'var(--text-primary)' }}
-          >
+        <div style={{
+          padding: '18px 20px 14px',
+          borderBottom: '1px solid var(--border-subtle)',
+        }}>
+          <div style={{
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: 'var(--accent)',
+          }}>
             IsoVault
-          </span>
+          </div>
+          <div style={{
+            marginTop: 6,
+            height: 2,
+            width: 24,
+            background: 'var(--accent)',
+          }} />
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-3 px-2">
+        <nav style={{ flex: 1, padding: '10px 0' }}>
           {navItems.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/'}
-              className={({ isActive }) =>
-                [
-                  'flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors mb-0.5',
-                  isActive
-                    ? 'font-medium'
-                    : '',
-                ].join(' ')
-              }
               style={({ isActive }) => ({
-                background: isActive ? 'var(--accent-subtle)' : 'transparent',
-                color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '7px 20px',
+                borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+                background: 'transparent',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                fontFamily: 'ui-monospace, monospace',
+                fontSize: 11,
+                fontWeight: isActive ? 600 : 400,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                textDecoration: 'none',
+                transition: 'color 120ms, border-color 120ms',
               })}
             >
               {label}
@@ -67,16 +81,20 @@ export default function App() {
         </nav>
 
         {/* Footer */}
-        <div
-          className="px-5 py-3 border-t text-xs"
-          style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
-        >
-          IsoVault v1.0.0
+        <div style={{
+          padding: '12px 20px',
+          borderTop: '1px solid var(--border-subtle)',
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 10,
+          letterSpacing: '0.05em',
+          color: 'var(--text-disabled)',
+        }}>
+          v1.0.0
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      <main style={{ flex: 1, overflow: 'auto' }}>
         <Routes>
           <Route path="/"          element={<Dashboard />} />
           <Route path="/catalog"   element={<Catalog />} />

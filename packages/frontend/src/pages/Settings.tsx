@@ -30,10 +30,17 @@ const SETTING_LABELS: Record<string, { label: string; description: string; type:
   },
 };
 
-function SettingRow({
-  setting,
-  onSave,
-}: {
+const inputStyle: React.CSSProperties = {
+  padding: '6px 10px',
+  border: '1px solid var(--border-default)',
+  background: 'var(--bg-input)',
+  color: 'var(--text-primary)',
+  fontFamily: 'ui-monospace, monospace',
+  fontSize: 12,
+  outline: 'none',
+};
+
+function SettingRow({ setting, onSave }: {
   setting: AppSetting;
   onSave: (key: string, value: string) => Promise<void>;
 }) {
@@ -65,7 +72,15 @@ function SettingRow({
     <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-subtle)' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)', marginBottom: 2 }}>
+          <div style={{
+            fontFamily: 'ui-monospace, monospace',
+            fontSize: 11,
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            color: 'var(--text-primary)',
+            marginBottom: 4,
+          }}>
             {meta?.label ?? setting.key}
           </div>
           {meta?.description && (
@@ -73,12 +88,12 @@ function SettingRow({
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {meta?.type === 'select' ? (
             <select
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              style={{ fontSize: 13, padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+              style={inputStyle}
             >
               {(meta.options ?? []).map((o) => (
                 <option key={o} value={o}>{o}</option>
@@ -89,7 +104,7 @@ function SettingRow({
               type="number"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              style={{ fontSize: 13, padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)', width: 100 }}
+              style={{ ...inputStyle, width: 100 }}
             />
           )}
 
@@ -97,12 +112,15 @@ function SettingRow({
             onClick={() => void handleSave()}
             disabled={!dirty || saving}
             style={{
-              padding: '5px 14px',
-              fontSize: 12,
-              borderRadius: 'var(--radius-sm)',
+              padding: '6px 14px',
               border: 'none',
               background: saved ? 'var(--color-success)' : dirty ? 'var(--accent)' : 'var(--bg-elevated)',
-              color: saved || dirty ? '#fff' : 'var(--text-muted)',
+              color: saved ? '#fff' : dirty ? '#080808' : 'var(--text-muted)',
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
               cursor: dirty && !saving ? 'pointer' : 'default',
               transition: 'background 0.2s',
             }}
@@ -113,7 +131,7 @@ function SettingRow({
       </div>
 
       {err && (
-        <div style={{ fontSize: 12, color: 'var(--color-error)', marginTop: 6 }}>{err}</div>
+        <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--color-error)', marginTop: 6 }}>{err}</div>
       )}
     </div>
   );
@@ -145,20 +163,41 @@ export default function Settings() {
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: 700 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 24 }}>
+      <h1 style={{
+        fontFamily: 'ui-monospace, monospace',
+        fontSize: 11,
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.12em',
+        color: 'var(--text-secondary)',
+        marginBottom: 4,
+      }}>
         Settings
       </h1>
+      <div className="page-rule" />
 
       {error && (
-        <div style={{ background: 'var(--color-error-subtle)', color: 'var(--color-error)', padding: '10px 14px', borderRadius: 'var(--radius-md)', marginBottom: 16, fontSize: 13 }}>
+        <div style={{
+          background: 'var(--color-error-subtle)',
+          border: '1px solid var(--color-error)',
+          color: 'var(--color-error)',
+          padding: '8px 12px',
+          marginBottom: 16,
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 11,
+        }}>
           {error}
         </div>
       )}
 
       {loading ? (
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>
+        <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11 }}>Loading…</p>
       ) : (
-        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: '0 20px' }}>
+        <div style={{
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          padding: '0 20px',
+        }}>
           {settings.map((s) => (
             <SettingRow key={s.key} setting={s} onSave={handleSave} />
           ))}

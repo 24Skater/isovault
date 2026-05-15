@@ -2,93 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Design tokens — dark mode (default) ─────────────────────────────────── */
+/* ─── Design tokens — Industrial Brutalist ──────────────────────────────────── */
 :root {
-  --bg-base:        #0f1117;
-  --bg-surface:     #161b27;
-  --bg-elevated:    #1e2537;
-  --bg-popup:       #252e42;
-  --bg-highlight:   #2d3650;
+  --bg-base:        #080808;
+  --bg-surface:     #0f0f0f;
+  --bg-elevated:    #171717;
+  --bg-popup:       #1f1f1f;
+  --bg-highlight:   #252525;
 
-  --border-subtle:  rgba(255,255,255,0.06);
-  --border-default: rgba(255,255,255,0.10);
-  --border-strong:  rgba(255,255,255,0.18);
+  --border-subtle:  #1a1a1a;
+  --border-default: #2d2d2d;
+  --border-strong:  #484848;
 
-  --text-primary:   #e8eaf0;
-  --text-secondary: #8b92a8;
-  --text-muted:     #545d75;
-  --text-disabled:  #384060;
+  --text-primary:   #f0f0f0;
+  --text-secondary: #888888;
+  --text-muted:     #484848;
+  --text-disabled:  #282828;
 
-  --accent:         #5b7cf6;
-  --accent-hover:   #3d5bd4;
-  --accent-subtle:  rgba(91,124,246,0.12);
+  /* Acid yellow — the one commanding accent */
+  --accent:         #dcff00;
+  --accent-hover:   #c9eb00;
+  --accent-subtle:  rgba(220, 255, 0, 0.06);
 
-  --color-success:        #2dd4a0;
-  --color-success-subtle: rgba(45,212,160,0.10);
-  --color-warning:        #f5a623;
-  --color-warning-subtle: rgba(245,166,35,0.12);
-  --color-danger:         #f04b4b;
-  --color-danger-subtle:  rgba(240,75,75,0.10);
-  --color-info:           #5b7cf6;
-  --color-info-subtle:    rgba(91,124,246,0.10);
+  --color-success:        #00cc6e;
+  --color-success-subtle: rgba(0, 204, 110, 0.10);
+  --color-warning:        #ff9900;
+  --color-warning-subtle: rgba(255, 153, 0, 0.10);
+  --color-danger:         #ff3333;
+  --color-danger-subtle:  rgba(255, 51, 51, 0.10);
+  --color-info:           #dcff00;
+  --color-info-subtle:    rgba(220, 255, 0, 0.06);
 
-  /* Aliases used by components */
-  --bg-input:         #1a2035;
-  --bg-hover:         rgba(255,255,255,0.06);
+  --bg-input:         #111111;
+  --bg-hover:         rgba(255, 255, 255, 0.03);
   --color-error:          var(--color-danger);
   --color-error-subtle:   var(--color-danger-subtle);
 
-  --status-active:   #2dd4a0;
-  --status-download: #5b7cf6;
-  --status-archive:  #545d75;
-  --status-corrupt:  #f04b4b;
-  --status-pending:  #f5a623;
+  --status-active:   #00cc6e;
+  --status-download: #dcff00;
+  --status-archive:  #555555;
+  --status-corrupt:  #ff3333;
+  --status-pending:  #ff9900;
 
-  --radius-sm:  6px;
-  --radius-md:  8px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
+  /* No rounding — sharp edges everywhere */
+  --radius-sm:  0px;
+  --radius-md:  0px;
+  --radius-lg:  0px;
+  --radius-xl:  0px;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-sm: none;
+  --shadow-md: none;
 }
 
-/* ─── Light mode ─────────────────────────────────────────────────────────── */
-html.light {
-  --bg-base:        #f4f5f7;
-  --bg-surface:     #ffffff;
-  --bg-elevated:    #f0f1f5;
-  --bg-popup:       #ffffff;
-  --bg-highlight:   #eef0ff;
-
-  --border-subtle:  rgba(0,0,0,0.05);
-  --border-default: rgba(0,0,0,0.10);
-  --border-strong:  rgba(0,0,0,0.18);
-
-  --text-primary:   #111827;
-  --text-secondary: #4b5563;
-  --text-muted:     #9ca3af;
-  --text-disabled:  #d1d5db;
-
-  --accent:         #4361d8;
-  --accent-hover:   #2f4fba;
-  --accent-subtle:  rgba(67,97,216,0.08);
-
-  --color-success:        #0d9e74;
-  --color-success-subtle: rgba(13,158,116,0.08);
-  --color-warning:        #d48a0f;
-  --color-warning-subtle: rgba(212,138,15,0.10);
-  --color-danger:         #dc2626;
-  --color-danger-subtle:  rgba(220,38,38,0.08);
-
-  /* Aliases */
-  --bg-input:         #f8f9fc;
-  --bg-hover:         rgba(0,0,0,0.04);
-  --color-error:          var(--color-danger);
-  --color-error-subtle:   var(--color-danger-subtle);
-}
-
-/* ─── Base styles ────────────────────────────────────────────────────────── */
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -96,27 +62,46 @@ html.light {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 13px;
-  line-height: 1.6;
-  background-color: var(--bg-base);
+  line-height: 1.5;
+  background: var(--bg-base);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code, pre, .font-mono {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 12px;
 }
 
-/* ─── Focus ring ─────────────────────────────────────────────────────────── */
+/* ─── Focus ─────────────────────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: 1px solid var(--accent);
+  outline-offset: 0;
 }
 
-/* ─── Animations ─────────────────────────────────────────────────────────── */
+/* ─── Page header rule ─────────────────────────────────────────────────────── */
+.page-rule {
+  height: 1px;
+  background: var(--border-default);
+  margin: 14px 0 20px;
+}
+
+/* ─── Industrial badge ─────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+/* ─── Animations ────────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
   .progress-fill {
     transition: width 250ms ease-out;
@@ -124,7 +109,7 @@ code, pre, .font-mono {
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
+    50%       { opacity: 0.35; }
   }
 
   .animate-pulse-slow {
@@ -132,12 +117,12 @@ code, pre, .font-mono {
   }
 
   @keyframes slideIn {
-    from { transform: translateX(16px); opacity: 0; }
+    from { transform: translateX(12px); opacity: 0; }
     to   { transform: translateX(0);    opacity: 1; }
   }
 
   .animate-slide-in {
-    animation: slideIn 200ms ease-out;
+    animation: slideIn 150ms ease-out;
   }
 
   @keyframes fadeIn {
@@ -146,6 +131,6 @@ code, pre, .font-mono {
   }
 
   .animate-fade-in {
-    animation: fadeIn 120ms ease;
+    animation: fadeIn 100ms ease;
   }
 }

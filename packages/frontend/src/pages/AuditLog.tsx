@@ -3,29 +3,26 @@ import { fetchAuditLog, type AuditLogEntry, type AuditSeverity } from '../api/au
 
 // ─── Severity badge ───────────────────────────────────────────────────────────
 
-const SEV_COLORS: Record<AuditSeverity, { bg: string; color: string }> = {
-  info:     { bg: 'var(--bg-elevated)',          color: 'var(--text-secondary)' },
-  warn:     { bg: 'var(--color-warning-subtle)', color: 'var(--color-warning)'  },
-  error:    { bg: 'var(--color-error-subtle)',   color: 'var(--color-error)'    },
-  critical: { bg: 'var(--color-error)',          color: '#fff'                  },
+const SEV_BORDER: Record<AuditSeverity, string> = {
+  info:     'var(--border-strong)',
+  warn:     'var(--color-warning)',
+  error:    'var(--color-error)',
+  critical: 'var(--color-error)',
+};
+
+const SEV_COLOR: Record<AuditSeverity, string> = {
+  info:     'var(--text-muted)',
+  warn:     'var(--color-warning)',
+  error:    'var(--color-error)',
+  critical: 'var(--color-error)',
 };
 
 function SeverityBadge({ severity }: { severity: AuditSeverity }) {
-  const c = SEV_COLORS[severity] ?? SEV_COLORS.info;
   return (
-    <span
-      style={{
-        background: c.bg,
-        color: c.color,
-        fontSize: 10,
-        fontWeight: 600,
-        padding: '2px 6px',
-        borderRadius: 'var(--radius-sm)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        whiteSpace: 'nowrap',
-      }}
-    >
+    <span className="badge" style={{
+      border: `1px solid ${SEV_BORDER[severity] ?? 'var(--border-strong)'}`,
+      color: SEV_COLOR[severity] ?? 'var(--text-muted)',
+    }}>
       {severity}
     </span>
   );
@@ -37,6 +34,28 @@ function fmtDate(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
+const inputStyle: React.CSSProperties = {
+  fontSize: 11,
+  padding: '6px 10px',
+  border: '1px solid var(--border-default)',
+  background: 'var(--bg-input)',
+  color: 'var(--text-primary)',
+  fontFamily: 'ui-monospace, monospace',
+  outline: 'none',
+};
+
+const btnStyle: React.CSSProperties = {
+  padding: '4px 10px',
+  background: 'transparent',
+  border: '1px solid var(--border-default)',
+  color: 'var(--text-secondary)',
+  fontFamily: 'ui-monospace, monospace',
+  fontSize: 10,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  cursor: 'pointer',
+};
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AuditLog() {
@@ -45,7 +64,6 @@ export default function AuditLog() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [filterSeverity, setFilterSeverity] = useState('');
   const [filterEventType, setFilterEventType] = useState('');
 
@@ -78,16 +96,26 @@ export default function AuditLog() {
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: 1100 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 16 }}>
+      <h1 style={{
+        fontFamily: 'ui-monospace, monospace',
+        fontSize: 11,
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.12em',
+        color: 'var(--text-secondary)',
+        marginBottom: 4,
+      }}>
         Audit Log
+        <span style={{ marginLeft: 12, color: 'var(--text-muted)', fontWeight: 400 }}>{total}</span>
       </h1>
+      <div className="page-rule" />
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <select
           value={filterSeverity}
           onChange={(e) => { setFilterSeverity(e.target.value); setPage(1); }}
-          style={{ fontSize: 13, padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+          style={inputStyle}
         >
           <option value="">All severities</option>
           <option value="info">Info</option>
@@ -101,27 +129,40 @@ export default function AuditLog() {
           placeholder="Filter by event type…"
           value={filterEventType}
           onChange={(e) => { setFilterEventType(e.target.value); setPage(1); }}
-          style={{ fontSize: 13, padding: '5px 10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)', minWidth: 200 }}
+          style={{ ...inputStyle, minWidth: 200 }}
         />
-
-        <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center' }}>
-          {total} event{total !== 1 ? 's' : ''}
-        </span>
       </div>
 
       {error && (
-        <div style={{ background: 'var(--color-error-subtle)', color: 'var(--color-error)', padding: '10px 14px', borderRadius: 'var(--radius-md)', marginBottom: 12, fontSize: 13 }}>
+        <div style={{
+          background: 'var(--color-error-subtle)',
+          border: '1px solid var(--color-error)',
+          color: 'var(--color-error)',
+          padding: '8px 12px',
+          marginBottom: 12,
+          fontFamily: 'ui-monospace, monospace',
+          fontSize: 11,
+        }}>
           {error}
         </div>
       )}
 
       {/* Table */}
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-elevated)' }}>
+            <tr style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--bg-elevated)' }}>
               {['Severity', 'Event Type', 'Entity', 'Timestamp'].map((h) => (
-                <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 600, color: 'var(--text-secondary)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th key={h} style={{
+                  padding: '8px 12px',
+                  textAlign: 'left',
+                  fontFamily: 'ui-monospace, monospace',
+                  fontWeight: 600,
+                  color: 'var(--text-muted)',
+                  fontSize: 10,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}>
                   {h}
                 </th>
               ))}
@@ -130,13 +171,13 @@ export default function AuditLog() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={4} style={{ padding: 24, textAlign: 'center', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
                   Loading…
                 </td>
               </tr>
             ) : entries.length === 0 ? (
               <tr>
-                <td colSpan={4} style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={4} style={{ padding: 24, textAlign: 'center', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
                   No events found.
                 </td>
               </tr>
@@ -146,13 +187,13 @@ export default function AuditLog() {
                   <td style={{ padding: '8px 12px' }}>
                     <SeverityBadge severity={e.severity} />
                   </td>
-                  <td style={{ padding: '8px 12px', fontFamily: 'monospace', color: 'var(--text-primary)' }}>
+                  <td style={{ padding: '8px 12px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-primary)' }}>
                     {e.eventType}
                   </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)' }}>
+                  <td style={{ padding: '8px 12px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                     {e.entityType ? `${e.entityType}${e.entityId ? ` / ${e.entityId.slice(0, 8)}…` : ''}` : '—'}
                   </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--text-muted)' }}>
+                  <td style={{ padding: '8px 12px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
                     {fmtDate(e.createdAt)}
                   </td>
                 </tr>
@@ -164,22 +205,16 @@ export default function AuditLog() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12, alignItems: 'center' }}>
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            style={{ padding: '4px 12px', fontSize: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: page === 1 ? 'default' : 'pointer', opacity: page === 1 ? 0.4 : 1 }}
-          >
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 12, alignItems: 'center' }}>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
+            style={{ ...btnStyle, opacity: page === 1 ? 0.4 : 1 }}>
             Prev
           </button>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
             {page} / {totalPages}
           </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            style={{ padding: '4px 12px', fontSize: 12, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)', cursor: page === totalPages ? 'default' : 'pointer', opacity: page === totalPages ? 0.4 : 1 }}
-          >
+          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+            style={{ ...btnStyle, opacity: page === totalPages ? 0.4 : 1 }}>
             Next
           </button>
         </div>

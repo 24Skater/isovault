@@ -25,7 +25,9 @@
       "Bash(find \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/workers\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/websocket\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/scheduler\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/watchers\" \"/mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/utils\" -type f 2>/dev/null)",
       "Read(//mnt/c/Users/ramos/GitHub/isovault/packages/backend/src/**)",
       "PowerShell(New-Item -ItemType Directory -Force C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\scheduler)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(Test-Path \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\README.md\")",
+      "Read(//c/Users/ramos/.claude/skills/**)"
     ]
   }
 }
