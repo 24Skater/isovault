@@ -1,5 +1,10 @@
 import type { FastifyInstance } from 'fastify';
-import { listVersions, getVersion } from '../services/iso';
+import { listVersions, getVersion, rowToVersion } from '../services/iso';
+import { NotFoundError, ValidationError } from '../errors/base';
+import { getDb } from '../db/client';
+import type { IsoVersionRow, IsoDefinitionRow } from '../db/schema';
+import { logEvent } from '../services/audit';
+import { deleteFile } from '../services/storage';
 
 export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
   // ── GET /api/definitions/:definitionId/versions ───────────────────────────
@@ -27,5 +32,129 @@ export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
       versionId: string;
     };
     return getVersion(definitionId, versionId);
+  });
+
+  // ── GET /api/versions ─────────────────────────────────────────────────────
+  // Cross-definition query — supports ?status=archived|active|deleted
+  fastify.get('/api/versions', async (request) => {
+    const query = request.query as { status?: string; page?: string; limit?: string };
+
+    const db = getDb();
+    const limit = query.limit ? parseInt(query.limit, 10) : 50;
+    const page = query.page ? parseInt(query.page, 10) : 1;
+    const offset = (page - 1) * limit;
+
+    const where = query.status ? 'WHERE v.status = ?' : '';
+    const bindings: (string | number)[] = query.status ? [query.status] : [];
+
+    const { count } = db
+      .prepare(`SELECT COUNT(*) as count FROM iso_versions v ${where}`)
+      .get(...bindings) as { count: number };
+
+    const rows = db
+      .prepare(
+        `SELECT v.*, d.name as definition_name, d.family as definition_family
+         FROM iso_versions v
+         JOIN iso_definitions d ON d.id = v.definition_id
+         ${where}
+         ORDER BY v.created_at DESC LIMIT ? OFFSET ?`,
+      )
+      .all(...bindings, limit, offset) as (IsoVersionRow & {
+      definition_name: string;
+      definition_family: string;
+    })[];
+
+    const data = rows.map((r) => ({
+      ...rowToVersion(r),
+      definitionName: r.definition_name,
+      definitionFamily: r.definition_family,
+    }));
+
+    return { data, total: count, page, limit };
+  });
+
+  // ── PATCH /api/versions/:id/archive ──────────────────────────────────────
+  fastify.patch('/api/versions/:id/archive', async (request) => {
+    const { id } = request.params as { id: string };
+    const db = getDb();
+
+    const row = db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as
+      | IsoVersionRow
+      | undefined;
+    if (!row) throw new NotFoundError('IsoVersion', id);
+
+    if (row.status === 'archived') return rowToVersion(row);
+    if (row.status !== 'active') {
+      throw new ValidationError(`Cannot archive a version with status '${row.status}'`);
+    }
+
+    db.prepare(
+      `UPDATE iso_versions SET status = 'archived', archived_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`,
+    ).run(id);
+
+    logEvent('version.archived', 'version', id, { definitionId: row.definition_id });
+
+    return rowToVersion(
+      db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as IsoVersionRow,
+    );
+  });
+
+  // ── PATCH /api/versions/:id/activate ─────────────────────────────────────
+  fastify.patch('/api/versions/:id/activate', async (request) => {
+    const { id } = request.params as { id: string };
+    const db = getDb();
+
+    const row = db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as
+      | IsoVersionRow
+      | undefined;
+    if (!row) throw new NotFoundError('IsoVersion', id);
+
+    if (row.status === 'active') return rowToVersion(row);
+    if (row.status !== 'archived') {
+      throw new ValidationError(`Cannot activate a version with status '${row.status}'`);
+    }
+
+    db.prepare(
+      `UPDATE iso_versions SET status = 'active', archived_at = NULL, updated_at = datetime('now') WHERE id = ?`,
+    ).run(id);
+
+    logEvent('version.activated', 'version', id, { definitionId: row.definition_id });
+
+    return rowToVersion(
+      db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as IsoVersionRow,
+    );
+  });
+
+  // ── DELETE /api/versions/:id ──────────────────────────────────────────────
+  fastify.delete('/api/versions/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const db = getDb();
+
+    const row = db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as
+      | IsoVersionRow
+      | undefined;
+    if (!row) throw new NotFoundError('IsoVersion', id);
+
+    // Check definition exists (for context in audit log)
+    const defRow = db
+      .prepare('SELECT name FROM iso_definitions WHERE id = ?')
+      .get(row.definition_id) as IsoDefinitionRow | undefined;
+
+    try {
+      deleteFile(row.file_path);
+    } catch {
+      // Ignore ENOENT — file may already be gone
+    }
+
+    db.prepare(
+      `UPDATE iso_versions SET status = 'deleted', updated_at = datetime('now') WHERE id = ?`,
+    ).run(id);
+
+    logEvent('version.deleted', 'version', id, {
+      definitionId: row.definition_id,
+      definitionName: defRow?.name ?? null,
+    });
+
+    return reply.status(204).send();
   });
 }

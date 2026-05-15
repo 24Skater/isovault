@@ -12,6 +12,11 @@ import { downloadRoutes } from './routes/downloads';
 import { downloadManager } from './services/download';
 import { scheduler } from './scheduler/cron';
 import { watcherRoutes } from './routes/watchers';
+import { auditRoutes } from './routes/audit';
+import { settingsRoutes } from './routes/settings';
+import { storageRoutes } from './routes/storage';
+import { webhookRoutes } from './routes/webhooks';
+import { statsRoutes } from './routes/stats';
 import { IsoManagerError } from './errors/base';
 
 // ─── Build server ─────────────────────────────────────────────────────────────
@@ -67,6 +72,11 @@ export async function buildServer(): Promise<FastifyInstance> {
   await server.register(versionRoutes);
   await server.register(downloadRoutes);
   await server.register(watcherRoutes);
+  await server.register(auditRoutes);
+  await server.register(settingsRoutes);
+  await server.register(storageRoutes);
+  await server.register(webhookRoutes);
+  await server.register(statsRoutes);
 
   // ── Global error handler (RFC 7807) ─────────────────────────────────────────
 

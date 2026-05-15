@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/client';
 import type { AuditLogEntry, AuditSeverity } from '../types';
 import type { AuditLogRow } from '../db/schema';
+import { dispatch } from './webhook';
 
 // ─── Mapper ───────────────────────────────────────────────────────────────────
 
@@ -34,7 +35,22 @@ export function logEvent(
      VALUES (?, ?, ?, ?, ?, ?)`,
   ).run(id, eventType, entityType, entityId, payload ? JSON.stringify(payload) : null, severity);
 
-  return rowToEntry(db.prepare('SELECT * FROM audit_log WHERE id = ?').get(id) as AuditLogRow);
+  const entry = rowToEntry(
+    db.prepare('SELECT * FROM audit_log WHERE id = ?').get(id) as AuditLogRow,
+  );
+
+  // Fire webhooks asynchronously — don't await to avoid blocking callers
+  void dispatch(eventType, {
+    entityType,
+    entityId,
+    payload,
+    severity,
+    auditId: id,
+  }).catch(() => {
+    // Webhook delivery failures must not propagate to audit callers
+  });
+
+  return entry;
 }
 
 // ─── Read ─────────────────────────────────────────────────────────────────────
@@ -43,6 +59,7 @@ export interface ListEventsParams {
   entityType?: string;
   entityId?: string;
   severity?: AuditSeverity;
+  eventType?: string;
   limit?: number;
   page?: number;
 }
@@ -63,6 +80,10 @@ export function listEvents(params: ListEventsParams): { entries: AuditLogEntry[]
   if (params.severity) {
     conditions.push('severity = ?');
     bindings.push(params.severity);
+  }
+  if (params.eventType) {
+    conditions.push('event_type = ?');
+    bindings.push(params.eventType);
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';

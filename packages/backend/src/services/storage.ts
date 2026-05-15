@@ -57,6 +57,8 @@ export function deleteFile(filePath: string): void {
 export interface StorageStats {
   storagePath: string;
   usedBytes: number;
+  freeBytes: number | null;
+  totalBytes: number | null;
   alertThresholdPercent: number;
 }
 
@@ -75,9 +77,22 @@ function dirSizeBytes(dirPath: string): number {
 }
 
 export function getStorageStats(): StorageStats {
+  let freeBytes: number | null = null;
+  let totalBytes: number | null = null;
+
+  try {
+    const stat = fs.statfsSync(config.storage.path);
+    freeBytes = stat.bfree * stat.bsize;
+    totalBytes = stat.blocks * stat.bsize;
+  } catch {
+    // statfsSync unavailable on some platforms (e.g. older Node or Windows paths)
+  }
+
   return {
     storagePath: config.storage.path,
     usedBytes: dirSizeBytes(config.storage.path),
+    freeBytes,
+    totalBytes,
     alertThresholdPercent: config.storage.alertThresholdPercent,
   };
 }
