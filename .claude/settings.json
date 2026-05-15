@@ -27,7 +27,25 @@
       "PowerShell(New-Item -ItemType Directory -Force C:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\\\\scheduler)",
       "Bash(npm run *)",
       "Bash(Test-Path \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\README.md\")",
-      "Read(//c/Users/ramos/.claude/skills/**)"
+      "Read(//c/Users/ramos/.claude/skills/**)",
+      "PowerShell(Get-Content \"$env:TEMP\\\\e2e-server-out.txt\")",
+      "Bash(npx playwright *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(git config *)",
+      "Bash(Start-Sleep -Seconds 3)",
+      "Bash(Get-Content \"C:\\\\Users\\\\ramos\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-ramos-GitHub-isovault\\\\d0305652-5674-4eff-8ace-7140b872311f\\\\tasks\\\\bj4qbl8cj.output\")",
+      "Bash(gh run *)",
+      "Bash(npm show *)",
+      "Bash(npm audit *)",
+      "Bash(xargs grep '\"version\"')",
+      "Bash(git commit -m 'fix: resolve CI failures in unit tests and security audit *)",
+      "Bash(git commit -m 'fix: prevent crash when DownloadManager timer fires after DB close *)",
+      "Bash(git commit -m 'fix: simplify Docker build stage to use hoisted root node_modules *)",
+      "Bash(git commit -m 'fix: restore backend node_modules copy in Docker build stage *)"
     ]
   }
 }
