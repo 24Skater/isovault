@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchWatchers, triggerWatcher } from '../api/watchers';
 import type { WsVersionDetectedEvent } from '../api/downloads';
 import type { IsoDefinition, WatchStrategy } from '../api/definitions';
@@ -121,6 +121,12 @@ export default function Watchers() {
   const [detections, setDetections] = useState<Record<string, WsVersionDetectedEvent>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const detectionTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => {
+    const timers = detectionTimers.current;
+    return () => { timers.forEach((t) => clearTimeout(t)); };
+  }, []);
 
   const loadWatchers = useCallback(async () => {
     try {
@@ -144,13 +150,17 @@ export default function Watchers() {
       (event: WsVersionDetectedEvent) => {
         setDetections((prev) => ({ ...prev, [event.definitionId]: event }));
         void loadWatchers();
-        setTimeout(() => {
+        const existing = detectionTimers.current.get(event.definitionId);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => {
           setDetections((prev) => {
             const next = { ...prev };
             delete next[event.definitionId];
             return next;
           });
+          detectionTimers.current.delete(event.definitionId);
         }, 10_000);
+        detectionTimers.current.set(event.definitionId, t);
       },
       [loadWatchers],
     ),

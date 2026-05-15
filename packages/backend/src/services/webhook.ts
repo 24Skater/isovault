@@ -59,10 +59,7 @@ export function createWebhook(input: CreateWebhookInput): Webhook {
   return rowToWebhook(getDb().prepare('SELECT * FROM webhooks WHERE id = ?').get(id) as WebhookRow);
 }
 
-export function updateWebhook(
-  id: string,
-  patch: Partial<CreateWebhookInput>,
-): Webhook | null {
+export function updateWebhook(id: string, patch: Partial<CreateWebhookInput>): Webhook | null {
   const existing = getWebhook(id);
   if (!existing) return null;
 
@@ -93,9 +90,7 @@ function sign(payload: string, secret: string): string {
 }
 
 export async function dispatch(eventType: string, payload: Record<string, unknown>): Promise<void> {
-  const hooks = getDb()
-    .prepare(`SELECT * FROM webhooks WHERE enabled = 1`)
-    .all() as WebhookRow[];
+  const hooks = getDb().prepare(`SELECT * FROM webhooks WHERE enabled = 1`).all() as WebhookRow[];
 
   const eligible = hooks.filter((h) => {
     const events = JSON.parse(h.events) as string[];
@@ -104,7 +99,11 @@ export async function dispatch(eventType: string, payload: Record<string, unknow
 
   if (eligible.length === 0) return;
 
-  const body = JSON.stringify({ event: eventType, ...payload, timestamp: new Date().toISOString() });
+  const body = JSON.stringify({
+    event: eventType,
+    ...payload,
+    timestamp: new Date().toISOString(),
+  });
 
   await Promise.allSettled(
     eligible.map(async (hook) => {

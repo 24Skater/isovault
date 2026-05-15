@@ -1,56 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { IsoVersion } from '../api/definitions';
-
-// ─── Shared request helper ────────────────────────────────────────────────────
-
-const BASE = '/api';
-
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error((err as { detail?: string }).detail ?? res.statusText);
-  }
-  if (res.status === 204) return undefined as unknown as T;
-  return res.json() as Promise<T>;
-}
-
-interface ArchivedVersion extends IsoVersion {
-  definitionName: string;
-  definitionFamily: string;
-}
-
-interface VersionsResponse {
-  data: ArchivedVersion[];
-  total: number;
-  page: number;
-  limit: number;
-}
-
-async function fetchArchivedVersions(page = 1): Promise<VersionsResponse> {
-  return request<VersionsResponse>(`/versions?status=archived&page=${page}&limit=50`);
-}
-
-async function activateVersion(id: string): Promise<IsoVersion> {
-  return request<IsoVersion>(`/versions/${id}/activate`, { method: 'PATCH' });
-}
-
-async function deleteVersion(id: string): Promise<void> {
-  return request<void>(`/versions/${id}`, { method: 'DELETE' });
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatBytes(n: number | null): string {
-  if (n === null) return '—';
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
-  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
-}
+import ConfirmDialog from '../components/ConfirmDialog';
+import { formatBytes } from '../utils/format';
+import {
+  fetchArchivedVersions,
+  activateVersion,
+  deleteVersion,
+  type ArchivedVersion,
+} from '../api/versions';
 
 const btnStyle: React.CSSProperties = {
   padding: '4px 10px',
@@ -73,6 +29,7 @@ export default function Archive() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionInFlight, setActionInFlight] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const load = useCallback(async (p: number) => {
     setLoading(true);
@@ -103,7 +60,6 @@ export default function Archive() {
   }, [load, page]);
 
   const handleDelete = useCallback(async (id: string) => {
-    if (!confirm('Permanently delete this version and its file? This cannot be undone.')) return;
     setActionInFlight(id);
     try {
       await deleteVersion(id);
@@ -112,11 +68,12 @@ export default function Archive() {
       setError(err instanceof Error ? err.message : 'Failed to delete version');
     } finally {
       setActionInFlight(null);
+      setConfirmDeleteId(null);
     }
   }, [load, page]);
 
   const LIMIT = 50;
-  const totalPages = Math.ceil(total / LIMIT);
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   const grouped = versions.reduce<Record<string, { name: string; family: string; items: ArchivedVersion[] }>>(
     (acc, v) => {
@@ -215,7 +172,7 @@ export default function Archive() {
                       Restore
                     </button>
                     <button
-                      onClick={() => void handleDelete(v.id)}
+                      onClick={() => setConfirmDeleteId(v.id)}
                       disabled={actionInFlight === v.id}
                       style={{ ...btnStyle, color: 'var(--color-error)', borderColor: 'var(--color-error)', opacity: actionInFlight === v.id ? 0.5 : 1 }}
                     >
@@ -241,6 +198,15 @@ export default function Archive() {
             Next
           </button>
         </div>
+      )}
+      {confirmDeleteId && (
+        <ConfirmDialog
+          title="Delete Version"
+          message="Permanently delete this version and its file? This cannot be undone."
+          confirmLabel="Delete"
+          onConfirm={() => void handleDelete(confirmDeleteId)}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchSettings, updateSetting, type AppSetting } from '../api/settings';
 
 const SETTING_LABELS: Record<string, { label: string; description: string; type: 'number' | 'select'; options?: string[] }> = {
@@ -49,8 +49,13 @@ function SettingRow({ setting, onSave }: {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setDraft(setting.value); }, [setting.value]);
+
+  useEffect(() => {
+    return () => { if (savedTimer.current) clearTimeout(savedTimer.current); };
+  }, []);
 
   const dirty = draft !== setting.value;
 
@@ -60,7 +65,8 @@ function SettingRow({ setting, onSave }: {
     try {
       await onSave(setting.key, draft);
       setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      savedTimer.current = setTimeout(() => setSaved(false), 2000);
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Save failed');
     } finally {

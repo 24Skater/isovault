@@ -13,6 +13,7 @@ import {
   deleteDefinition,
 } from '../api/definitions';
 import VersionTimeline from '../components/VersionTimeline';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 // ─── Shared input style ───────────────────────────────────────────────────────
 
@@ -41,76 +42,6 @@ function WatchBadge({ enabled }: { enabled: boolean }) {
   );
 }
 
-// ─── Confirm delete dialog ────────────────────────────────────────────────────
-
-function ConfirmDialog({ name, onConfirm, onCancel }: {
-  name: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(0,0,0,0.7)',
-      }}
-    >
-      <div style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-default)',
-        padding: '24px',
-        width: '100%',
-        maxWidth: 360,
-      }}>
-        <div style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 10,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.10em',
-          color: 'var(--color-error)',
-          marginBottom: 12,
-        }}>
-          Delete Definition
-        </div>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
-          Delete <strong style={{ color: 'var(--text-primary)' }}>{name}</strong>? This cannot be undone.
-        </p>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '6px 14px',
-              background: 'transparent',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-default)',
-              fontSize: 12,
-              cursor: 'pointer',
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              padding: '6px 14px',
-              background: 'var(--color-error)',
-              color: '#fff',
-              border: 'none',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Form field wrapper ───────────────────────────────────────────────────────
 
 function Field({ label, hint, children }: {
@@ -119,8 +50,8 @@ function Field({ label, hint, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label style={{
+    <label style={{ display: 'block' }}>
+      <span style={{
         display: 'block',
         fontFamily: 'ui-monospace, monospace',
         fontSize: 10,
@@ -132,9 +63,9 @@ function Field({ label, hint, children }: {
       }}>
         {label}
         {hint && <span style={{ marginLeft: 6, fontWeight: 400, opacity: 0.7 }}>{hint}</span>}
-      </label>
+      </span>
       {children}
-    </div>
+    </label>
   );
 }
 
@@ -415,9 +346,12 @@ function DefinitionModal({ editing, onSave, onClose }: {
           </div>
 
           {/* Watch toggle */}
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.watchEnabled}
             onClick={() => set('watchEnabled', !form.watchEnabled)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none', background: 'none', border: 'none', padding: 0, font: 'inherit', textAlign: 'left', width: '100%' }}
           >
             <div style={{
               width: 28,
@@ -446,7 +380,7 @@ function DefinitionModal({ editing, onSave, onClose }: {
             }}>
               Enable auto-watch
             </span>
-          </div>
+          </button>
         </div>
 
         <div style={{
@@ -778,7 +712,9 @@ export default function Catalog() {
       {/* Confirm delete */}
       {confirmDelete && (
         <ConfirmDialog
-          name={confirmDelete.name}
+          title="Delete Definition"
+          message={<>Delete <strong style={{ color: 'var(--text-primary)' }}>{confirmDelete.name}</strong>? This cannot be undone.</>}
+          confirmLabel="Delete"
           onConfirm={() => void handleDelete(confirmDelete)}
           onCancel={() => setConfirmDelete(null)}
         />

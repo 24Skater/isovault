@@ -7,15 +7,7 @@ import {
   type WsDownloadProgressEvent,
 } from '../api/downloads';
 import { useDownloadProgress, type ProgressMap } from '../hooks/useDownloadProgress';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatBytes(n: number): string {
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
-  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
-}
+import { formatBytes } from '../utils/format';
 
 function formatSpeed(bps: number | null): string {
   if (bps === null || bps <= 0) return '—';
@@ -273,7 +265,7 @@ export default function Downloads() {
   }, [loadJobs]);
 
   const activeJobs = jobs.filter((j) => j.status === 'running');
-  const queuedJobs = jobs.filter((j) => j.status === 'queued');
+  const queuedJobs = jobs.filter((j) => j.status === 'queued' || j.status === 'paused');
   const historyJobs = jobs.filter((j) => ['completed', 'failed', 'cancelled'].includes(j.status));
 
   return (

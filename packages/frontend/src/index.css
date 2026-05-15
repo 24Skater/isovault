@@ -30,9 +30,6 @@
   --color-warning-subtle: rgba(255, 153, 0, 0.10);
   --color-danger:         #ff3333;
   --color-danger-subtle:  rgba(255, 51, 51, 0.10);
-  --color-info:           #dcff00;
-  --color-info-subtle:    rgba(220, 255, 0, 0.06);
-
   --bg-input:         #111111;
   --bg-hover:         rgba(255, 255, 255, 0.03);
   --color-error:          var(--color-danger);

@@ -17,7 +17,12 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
 
   // ── POST /api/webhooks ─────────────────────────────────────────────────────
   fastify.post('/api/webhooks', async (request, reply) => {
-    const body = request.body as { url?: unknown; secret?: unknown; events?: unknown; enabled?: unknown };
+    const body = request.body as {
+      url?: unknown;
+      secret?: unknown;
+      events?: unknown;
+      enabled?: unknown;
+    };
 
     if (!body.url || typeof body.url !== 'string') {
       throw new ValidationError('body.url is required and must be a string', 'url');

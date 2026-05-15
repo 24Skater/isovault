@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { fetchAuditLog, type AuditLogEntry, type AuditSeverity } from '../api/audit';
 
+type AuditSeverityFilter = AuditSeverity | '';
+
 // ─── Severity badge ───────────────────────────────────────────────────────────
 
 const SEV_BORDER: Record<AuditSeverity, string> = {
@@ -64,7 +66,7 @@ export default function AuditLog() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterSeverity, setFilterSeverity] = useState('');
+  const [filterSeverity, setFilterSeverity] = useState<AuditSeverityFilter>('');
   const [filterEventType, setFilterEventType] = useState('');
 
   const LIMIT = 50;
@@ -76,7 +78,7 @@ export default function AuditLog() {
       const res = await fetchAuditLog({
         page: p,
         limit: LIMIT,
-        severity: sev as AuditSeverity || undefined,
+        severity: (sev || undefined) as AuditSeverity | undefined,
         eventType: et || undefined,
       });
       setEntries(res.data);
@@ -92,7 +94,7 @@ export default function AuditLog() {
     void load(page, filterSeverity, filterEventType);
   }, [load, page, filterSeverity, filterEventType]);
 
-  const totalPages = Math.ceil(total / LIMIT);
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: 1100 }}>
@@ -114,7 +116,7 @@ export default function AuditLog() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <select
           value={filterSeverity}
-          onChange={(e) => { setFilterSeverity(e.target.value); setPage(1); }}
+          onChange={(e) => { setFilterSeverity(e.target.value as AuditSeverityFilter); setPage(1); }}
           style={inputStyle}
         >
           <option value="">All severities</option>
