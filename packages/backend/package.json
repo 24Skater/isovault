@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"const {cpSync,mkdirSync}=require('fs');mkdirSync('dist/db/migrations',{recursive:true});cpSync('src/db/migrations','dist/db/migrations',{recursive:true})\"",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
@@ -48,7 +48,7 @@
     "root": true,
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-      "project": "./tsconfig.json"
+      "project": "./tsconfig.eslint.json"
     },
     "plugins": [
       "@typescript-eslint"
@@ -67,6 +67,15 @@
       ],
       "no-console": "off"
     },
+    "overrides": [
+      {
+        "files": ["**/*.test.ts", "**/*.spec.ts"],
+        "rules": {
+          "@typescript-eslint/no-var-requires": "off",
+          "@typescript-eslint/no-require-imports": "off"
+        }
+      }
+    ],
     "env": {
       "node": true,
       "es2022": true

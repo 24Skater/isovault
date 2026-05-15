@@ -4,7 +4,7 @@ import websocketPlugin from '@fastify/websocket';
 import path from 'path';
 import os from 'os';
 import config from './config';
-import { initDb } from './db/client';
+import { initDb, closeDb } from './db/client';
 import { healthRoutes } from './routes/health';
 import { definitionRoutes } from './routes/definitions';
 import { versionRoutes } from './routes/versions';
@@ -68,10 +68,11 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // ── Auth hook ────────────────────────────────────────────────────────────────
 
-  const PUBLIC_PATHS = new Set(['/health', '/ready', '/api/health']);
+  const PUBLIC_API_PATHS = new Set(['/health', '/ready', '/api/health']);
   server.addHook('onRequest', async (request, reply) => {
     const pathname = request.url.split('?')[0];
-    if (PUBLIC_PATHS.has(pathname)) return;
+    // Static files and health checks are publicly accessible
+    if (!pathname.startsWith('/api/') || PUBLIC_API_PATHS.has(pathname)) return;
     const header = request.headers['authorization'] ?? '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : '';
     if (!token || !(await verifyApiKey(token))) {
@@ -135,7 +136,6 @@ export async function buildServer(): Promise<FastifyInstance> {
   });
 
   server.addHook('onClose', (_instance, done) => {
-    const { closeDb } = require('./db/client') as typeof import('./db/client');
     downloadManager.stopPolling();
     scheduler.stop();
     closeDb();

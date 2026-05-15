@@ -2,9 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fs from 'fs';
 import { getDb } from '../db/client';
 import config from '../config';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { version } = require('../../package.json') as { version: string };
+import { version } from '../../package.json';
 
 export async function healthRoutes(fastify: FastifyInstance): Promise<void> {
   /** Liveness — always 200 if the process is running */

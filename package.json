@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "packages/backend",
-    "packages/frontend"
+    "packages/frontend",
+    "packages/e2e"
   ],
   "scripts": {
     "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w packages/backend\" \"npm run dev -w packages/frontend\"",

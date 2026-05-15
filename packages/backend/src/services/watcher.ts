@@ -6,7 +6,7 @@ import { runStrategy } from './watcher-strategies';
 import { logEvent } from './audit';
 import { hub } from '../websocket/hub';
 import { resolveVersionPath } from './storage';
-import { NotFoundError, WatcherError } from '../errors/base';
+import { NotFoundError } from '../errors/base';
 import type { IsoDefinitionRow, IsoVersionRow } from '../db/schema';
 import type { WatchStrategy } from '../types';
 

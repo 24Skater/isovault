@@ -15,6 +15,32 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2"
   },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module",
+      "ecmaFeatures": { "jsx": true }
+    },
+    "plugins": ["@typescript-eslint", "react-hooks", "react-refresh"],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "no-console": "off"
+    },
+    "env": {
+      "browser": true,
+      "es2022": true
+    }
+  },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

@@ -102,6 +102,47 @@ jobs:
           path: packages/frontend/dist/
           retention-days: 7
 
+  # ─── E2E tests ─────────────────────────────────────────────────────────────
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Download backend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-dist
+          path: packages/backend/dist/
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: packages/frontend/dist/
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+        working-directory: packages/e2e
+      - name: Create e2e env file
+        run: echo "ISO_MANAGER_API_KEY=${{ secrets.E2E_API_KEY || 'ci-e2e-api-key-isovault' }}" > packages/e2e/.env.e2e
+      - name: Run E2E tests
+        run: npx playwright test --project=chromium
+        working-directory: packages/e2e
+        env:
+          CI: "true"
+          ISO_MANAGER_API_KEY: ${{ secrets.E2E_API_KEY || 'ci-e2e-api-key-isovault' }}
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/e2e/playwright-report/
+          retention-days: 7
+
   # ─── Docker build ──────────────────────────────────────────────────────────
   docker:
     name: Docker Build
