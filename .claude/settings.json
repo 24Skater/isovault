@@ -45,7 +45,13 @@
       "Bash(git commit -m 'fix: resolve CI failures in unit tests and security audit *)",
       "Bash(git commit -m 'fix: prevent crash when DownloadManager timer fires after DB close *)",
       "Bash(git commit -m 'fix: simplify Docker build stage to use hoisted root node_modules *)",
-      "Bash(git commit -m 'fix: restore backend node_modules copy in Docker build stage *)"
+      "Bash(git commit -m 'fix: restore backend node_modules copy in Docker build stage *)",
+      "PowerShell(head)",
+      "Edit(~/.claude/skills/readme-expert/**)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\ramos\\\\.claude\\\\skills\\\\\" | Where-Object { $_.Name -eq \"readme-expert\" } | Format-Table Name, LastWriteTime)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\ramos\\.claude\\skills"
     ]
   }
 }
