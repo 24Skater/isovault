@@ -58,7 +58,19 @@
       "Read(//c/Users/ramos/.cache/**)",
       "Read(//root/.cache/**)",
       "Bash(node screenshot.mjs)",
-      "Bash(node screenshot-swagger.mjs)"
+      "Bash(node screenshot-swagger.mjs)",
+      "Bash(cat jest.config.js)",
+      "Bash(cat jest.config.ts)",
+      "Bash(node -e \"const p = require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.jest, null, 2\\)\\)\")",
+      "Bash(npx --prefix packages/backend ts-node -e ' *)",
+      "Bash(npx jest *)",
+      "Bash(cat jest.config.json)",
+      "Bash(cat babel.config.js)",
+      "Bash(cat babel.config.json)",
+      "Bash(cat .babelrc)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && head -50 {}')"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills"

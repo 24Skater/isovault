@@ -648,6 +648,96 @@ export const openApiSpec = {
       },
     },
 
+    '/api/definitions/{definitionId}/versions/import': {
+      post: {
+        tags: ['versions'],
+        summary: 'Import an existing ISO',
+        description:
+          'Register an ISO you already have — no download required.\n\n' +
+          '**Two modes, detected from `Content-Type`:**\n\n' +
+          '- `multipart/form-data` — upload the file directly from your machine\n' +
+          '- `application/json` — point to a file path already accessible on the server\n\n' +
+          'Both modes copy the file into the ISO store, compute its checksum, and create ' +
+          'an `active` version immediately — no download queue is involved.\n\n' +
+          '**Multipart fields:** `versionString` (required), `file` (required), `filename`, `checksum`, `releaseDate`, `notes`\n\n' +
+          '**JSON fields:** `sourcePath` (required), `versionString` (required), `filename`, `checksum`, `releaseDate`, `notes`',
+        operationId: 'importVersion',
+        parameters: [
+          {
+            name: 'definitionId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string', format: 'uuid' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file', 'versionString'],
+                properties: {
+                  file: { type: 'string', format: 'binary', description: 'The ISO file' },
+                  versionString: { type: 'string', example: '24.04.2' },
+                  filename: {
+                    type: 'string',
+                    description: 'Override the stored filename (defaults to uploaded filename)',
+                  },
+                  checksum: {
+                    type: 'string',
+                    description: 'Expected checksum (hex). Verified before accepting the file.',
+                  },
+                  releaseDate: { type: 'string', format: 'date', example: '2024-04-25' },
+                  notes: { type: 'string' },
+                },
+              },
+            },
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['sourcePath', 'versionString'],
+                properties: {
+                  sourcePath: {
+                    type: 'string',
+                    description: 'Absolute path to the ISO file on the server filesystem',
+                    example: '/mnt/nas/isos/ubuntu-24.04.2-desktop-amd64.iso',
+                  },
+                  versionString: { type: 'string', example: '24.04.2' },
+                  filename: {
+                    type: 'string',
+                    description: 'Override stored filename (defaults to basename of sourcePath)',
+                  },
+                  checksum: {
+                    type: 'string',
+                    description: 'Expected checksum (hex). Verified before accepting the file.',
+                  },
+                  releaseDate: { type: 'string', format: 'date', example: '2024-04-25' },
+                  notes: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'Version imported and marked active',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/IsoVersion' } },
+            },
+          },
+          '400': {
+            description: 'Validation error (missing fields, bad checksum, filename conflict)',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/ProblemDetail' } },
+            },
+          },
+          '401': { $ref: '#/components/responses/Unauthorized' },
+          '404': { $ref: '#/components/responses/NotFound' },
+        },
+      },
+    },
+
     '/api/definitions/{id}/watch/trigger': {
       post: {
         tags: ['definitions'],

@@ -4,6 +4,7 @@ import { downloadManager, rowToJob } from '../services/download';
 import { hub } from '../websocket/hub';
 import { NotFoundError } from '../errors/base';
 import type { DownloadJobRow } from '../db/schema';
+import { parsePagination } from '../utils/pagination';
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
@@ -31,12 +32,24 @@ export async function downloadRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.get<{
     Querystring: { status?: string; page?: string; limit?: string };
   }>('/api/downloads', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'string',
+            enum: ['queued', 'running', 'completed', 'failed', 'cancelled'],
+          },
+          page: { type: 'string', pattern: '^[1-9][0-9]*$' },
+          limit: { type: 'string', pattern: '^[1-9][0-9]*$' },
+        },
+        additionalProperties: false,
+      },
+    },
     handler: async (request, reply) => {
       const db = getDb();
-      const { status, page: pageStr, limit: limitStr } = request.query;
-      const limit = Math.min(parseInt(limitStr ?? '50', 10) || 50, 100);
-      const page = Math.max(parseInt(pageStr ?? '1', 10) || 1, 1);
-      const offset = (page - 1) * limit;
+      const { status } = request.query;
+      const { page, limit, offset } = parsePagination(request.query);
 
       const where = status ? 'WHERE status = ?' : '';
       const bindings = status ? [status] : [];

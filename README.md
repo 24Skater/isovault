@@ -249,6 +249,7 @@ Interactive documentation is available at **[http://localhost:3721/docs](http://
 | `DELETE` | `/api/definitions/:id` | ✓ | Delete a definition |
 | `POST` | `/api/definitions/:id/watch/trigger` | ✓ | Trigger a watcher check immediately |
 | `GET` | `/api/definitions/:id/versions` | ✓ | List versions for a definition |
+| `POST` | `/api/definitions/:id/versions/import` | ✓ | Import an ISO you already have (upload or server path) |
 | `GET` | `/api/versions` | ✓ | Cross-definition version query (`?status=archived`) |
 | `GET` | `/api/versions/:id/download` | ✓ | Stream the ISO file |
 | `GET` | `/api/versions/:id/verify` | ✓ | Re-verify checksum on disk |

@@ -6,8 +6,9 @@ import {
   updateWebhook,
   deleteWebhook,
   dispatch,
+  WEBHOOK_EVENTS,
 } from '../services/webhook';
-import { NotFoundError, ValidationError } from '../errors/base';
+import { NotFoundError } from '../errors/base';
 
 export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
   // ── GET /api/webhooks ──────────────────────────────────────────────────────
@@ -16,29 +17,42 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
   });
 
   // ── POST /api/webhooks ─────────────────────────────────────────────────────
-  fastify.post('/api/webhooks', async (request, reply) => {
-    const body = request.body as {
-      url?: unknown;
-      secret?: unknown;
-      events?: unknown;
-      enabled?: unknown;
-    };
+  fastify.post('/api/webhooks', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['url', 'events'],
+        properties: {
+          url: { type: 'string', format: 'uri', maxLength: 2048 },
+          secret: { type: 'string', maxLength: 512 },
+          events: {
+            type: 'array',
+            items: { type: 'string', enum: [...WEBHOOK_EVENTS] },
+            minItems: 1,
+            maxItems: 20,
+          },
+          enabled: { type: 'boolean' },
+        },
+        additionalProperties: false,
+      },
+    },
+    handler: async (request, reply) => {
+      const body = request.body as {
+        url: string;
+        secret?: string;
+        events: string[];
+        enabled?: boolean;
+      };
 
-    if (!body.url || typeof body.url !== 'string') {
-      throw new ValidationError('body.url is required and must be a string', 'url');
-    }
-    if (!Array.isArray(body.events)) {
-      throw new ValidationError('body.events must be an array of strings', 'events');
-    }
+      const webhook = await createWebhook({
+        url: body.url,
+        secret: body.secret ?? null,
+        events: body.events,
+        enabled: body.enabled !== false,
+      });
 
-    const webhook = createWebhook({
-      url: body.url,
-      secret: body.secret != null ? String(body.secret) : null,
-      events: (body.events as unknown[]).map(String),
-      enabled: body.enabled !== false,
-    });
-
-    return reply.status(201).send(webhook);
+      return reply.status(201).send(webhook);
+    },
   });
 
   // ── GET /api/webhooks/:id ─────────────────────────────────────────────────
@@ -62,7 +76,7 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
     }
     if ('enabled' in body) patch.enabled = Boolean(body['enabled']);
 
-    const updated = updateWebhook(id, patch);
+    const updated = await updateWebhook(id, patch);
     if (!updated) throw new NotFoundError('Webhook', id);
     return updated;
   });

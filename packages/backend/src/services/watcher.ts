@@ -1,11 +1,11 @@
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/client';
 import { downloadManager } from './download';
 import { runStrategy } from './watcher-strategies';
 import { logEvent } from './audit';
 import { hub } from '../websocket/hub';
 import { resolveVersionPath } from './storage';
+import { createVersion } from './iso';
 import { NotFoundError } from '../errors/base';
 import type { IsoDefinitionRow, IsoVersionRow } from '../db/schema';
 import type { WatchStrategy } from '../types';
@@ -106,31 +106,23 @@ class WatcherService {
       .get(definitionId, versionString) as Pick<IsoVersionRow, 'id'> | undefined;
 
     if (!existing) {
-      const versionId = uuidv4();
       const filename = deriveFilename(downloadUrl, definitionId, versionString);
       const filePath = resolveVersionPath(definitionId, filename);
 
-      db.prepare(
-        `INSERT INTO iso_versions
-           (id, definition_id, version_string, release_date, filename, file_path,
-            source_url, checksum, checksum_verified, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 'pending', ?, ?)`,
-      ).run(
-        versionId,
+      const version = createVersion({
         definitionId,
         versionString,
-        releaseDate ?? null,
         filename,
         filePath,
-        downloadUrl,
-        checksum ?? null,
-        now,
-        now,
-      );
+        sourceUrl: downloadUrl,
+        releaseDate: releaseDate ?? null,
+        checksum: checksum ?? null,
+        status: 'pending',
+      });
 
       // Enqueue download — swallow ConflictError (job already exists)
       try {
-        await downloadManager.enqueue(versionId);
+        await downloadManager.enqueue(version.id);
       } catch {
         // ConflictError or other non-critical enqueue failure
       }

@@ -9,9 +9,9 @@ import type { DownloadJobRow, IsoVersionRow } from '../db/schema';
 import { hub } from '../websocket/hub';
 import { assertSafeUrl } from '../utils/ssrf';
 import { verifyFileChecksum } from '../utils/checksum';
-import { moveFile, deleteFile } from './storage';
+import { moveFile, deleteFile, getStorageStats } from './storage';
 import { logEvent } from './audit';
-import { ConflictError, NotFoundError, ChecksumMismatchError } from '../errors/base';
+import { ConflictError, NotFoundError, ChecksumMismatchError, ValidationError } from '../errors/base';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -183,9 +183,29 @@ class DownloadManager {
     let bytesTotal: number | null = null;
     let lastBytes = 0;
     let lastTime = Date.now();
+    let timedOut = false;
+
+    // Arm the per-download hard timeout
+    const timeoutMs = config.downloads.timeoutSeconds * 1000;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeoutMs);
 
     try {
       ensureDownloadsDir();
+
+      // Reject the download before it starts if disk usage exceeds the alert threshold
+      const storageStats = getStorageStats();
+      if (
+        storageStats.totalBytes !== null &&
+        storageStats.usedBytes / storageStats.totalBytes >= config.storage.alertThresholdPercent / 100
+      ) {
+        throw new ValidationError(
+          `Disk usage has reached the alert threshold (${config.storage.alertThresholdPercent}%). Free up space before downloading.`,
+        );
+      }
+
       await assertSafeUrl(row.source_url);
 
       const res = await fetch(row.source_url, {
@@ -219,21 +239,25 @@ class DownloadManager {
         lastBytes = bytesDownloaded;
         lastTime = now;
 
-        hub.broadcast({
-          type: 'download.progress',
-          jobId,
-          versionId,
-          definitionId,
-          bytesDownloaded,
-          bytesTotal,
-          percent: bytesTotal ? Math.round((bytesDownloaded / bytesTotal) * 1000) / 10 : null,
-          speedBytesPerSec: speed,
-          etaSeconds:
-            speed && bytesTotal && speed > 0
-              ? Math.round((bytesTotal - bytesDownloaded) / speed)
-              : null,
-          timestamp: new Date().toISOString(),
-        });
+        try {
+          hub.broadcast({
+            type: 'download.progress',
+            jobId,
+            versionId,
+            definitionId,
+            bytesDownloaded,
+            bytesTotal,
+            percent: bytesTotal ? Math.round((bytesDownloaded / bytesTotal) * 1000) / 10 : null,
+            speedBytesPerSec: speed,
+            etaSeconds:
+              speed && bytesTotal && speed > 0
+                ? Math.round((bytesTotal - bytesDownloaded) / speed)
+                : null,
+            timestamp: new Date().toISOString(),
+          });
+        } catch {
+          // Hub errors must not interrupt the download stream
+        }
       }, 500);
 
       await new Promise<void>((resolve, reject) => {
@@ -304,12 +328,17 @@ class DownloadManager {
 
       deleteFile(tmpPath);
 
-      if (controller.signal.aborted) {
-        // cancel() already updated the DB — nothing more to do
+      if (controller.signal.aborted && !timedOut) {
+        // User-triggered cancel — cancel() already updated the DB
+        clearTimeout(timeoutId);
         return;
       }
 
-      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorMessage = timedOut
+        ? `Download timed out after ${config.downloads.timeoutSeconds}s`
+        : err instanceof Error
+          ? err.message
+          : String(err);
       const db = getDb();
       const jobRow = db
         .prepare(`SELECT * FROM download_jobs WHERE id = ?`)
@@ -374,6 +403,7 @@ class DownloadManager {
         logEvent('download.failed', 'iso_version', versionId, { jobId, errorMessage });
       }
     } finally {
+      clearTimeout(timeoutId);
       this.active.delete(jobId);
       void this.tick();
     }

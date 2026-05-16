@@ -9,24 +9,30 @@ import type { ChecksumAlgorithm } from '../types';
 import { logEvent } from '../services/audit';
 import { deleteFile } from '../services/storage';
 import { computeFileChecksum } from '../utils/checksum';
+import { parsePagination } from '../utils/pagination';
+
+const VALID_STATUSES = new Set(['pending', 'downloading', 'active', 'archived', 'corrupt', 'deleted']);
+
+const paginationQuery = {
+  type: 'object',
+  properties: {
+    page: { type: 'string', pattern: '^[1-9][0-9]*$' },
+    limit: { type: 'string', pattern: '^[1-9][0-9]*$' },
+  },
+} as const;
 
 export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
   // ── GET /api/definitions/:definitionId/versions ───────────────────────────
-  fastify.get('/api/definitions/:definitionId/versions', async (request) => {
-    const { definitionId } = request.params as { definitionId: string };
-    const query = request.query as { page?: string; limit?: string };
+  fastify.get('/api/definitions/:definitionId/versions', {
+    schema: { querystring: paginationQuery },
+    handler: async (request) => {
+      const { definitionId } = request.params as { definitionId: string };
+      const query = request.query as { page?: string; limit?: string };
 
-    const result = listVersions(definitionId, {
-      page: query.page ? parseInt(query.page, 10) : undefined,
-      limit: query.limit ? parseInt(query.limit, 10) : undefined,
-    });
-
-    return {
-      data: result.versions,
-      total: result.total,
-      page: query.page ? parseInt(query.page, 10) : 1,
-      limit: query.limit ? parseInt(query.limit, 10) : 50,
-    };
+      const { page, limit } = parsePagination(query);
+      const result = listVersions(definitionId, { page, limit });
+      return { data: result.versions, total: result.total, page, limit };
+    },
   });
 
   // ── GET /api/definitions/:definitionId/versions/:versionId ───────────────
@@ -39,42 +45,58 @@ export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
   });
 
   // ── GET /api/versions ─────────────────────────────────────────────────────
-  // Cross-definition query — supports ?status=archived|active|deleted
-  fastify.get('/api/versions', async (request) => {
-    const query = request.query as { status?: string; page?: string; limit?: string };
+  fastify.get('/api/versions', {
+    schema: {
+      querystring: {
+        ...paginationQuery,
+        properties: {
+          ...paginationQuery.properties,
+          status: {
+            type: 'string',
+            enum: ['pending', 'downloading', 'active', 'archived', 'corrupt', 'deleted'],
+          },
+        },
+      },
+    },
+    handler: async (request) => {
+      const query = request.query as { status?: string; page?: string; limit?: string };
 
-    const db = getDb();
-    const limit = query.limit ? parseInt(query.limit, 10) : 50;
-    const page = query.page ? parseInt(query.page, 10) : 1;
-    const offset = (page - 1) * limit;
+      // Guard in case schema validation is bypassed
+      if (query.status && !VALID_STATUSES.has(query.status)) {
+        throw new ValidationError(`Invalid status: ${query.status}`, 'status');
+      }
 
-    const where = query.status ? 'WHERE v.status = ?' : '';
-    const bindings: (string | number)[] = query.status ? [query.status] : [];
+      const db = getDb();
+      const { page, limit, offset } = parsePagination(query);
 
-    const { count } = db
-      .prepare(`SELECT COUNT(*) as count FROM iso_versions v ${where}`)
-      .get(...bindings) as { count: number };
+      const where = query.status ? 'WHERE v.status = ?' : '';
+      const bindings: (string | number)[] = query.status ? [query.status] : [];
 
-    const rows = db
-      .prepare(
-        `SELECT v.*, d.name as definition_name, d.family as definition_family
-         FROM iso_versions v
-         JOIN iso_definitions d ON d.id = v.definition_id
-         ${where}
-         ORDER BY v.created_at DESC LIMIT ? OFFSET ?`,
-      )
-      .all(...bindings, limit, offset) as (IsoVersionRow & {
-      definition_name: string;
-      definition_family: string;
-    })[];
+      const { count } = db
+        .prepare(`SELECT COUNT(*) as count FROM iso_versions v ${where}`)
+        .get(...bindings) as { count: number };
 
-    const data = rows.map((r) => ({
-      ...rowToVersion(r),
-      definitionName: r.definition_name,
-      definitionFamily: r.definition_family,
-    }));
+      const rows = db
+        .prepare(
+          `SELECT v.*, d.name as definition_name, d.family as definition_family
+           FROM iso_versions v
+           JOIN iso_definitions d ON d.id = v.definition_id
+           ${where}
+           ORDER BY v.created_at DESC LIMIT ? OFFSET ?`,
+        )
+        .all(...bindings, limit, offset) as (IsoVersionRow & {
+        definition_name: string;
+        definition_family: string;
+      })[];
 
-    return { data, total: count, page, limit };
+      const data = rows.map((r) => ({
+        ...rowToVersion(r),
+        definitionName: r.definition_name,
+        definitionFamily: r.definition_family,
+      }));
+
+      return { data, total: count, page, limit };
+    },
   });
 
   // ── PATCH /api/versions/:id/archive ──────────────────────────────────────
@@ -151,6 +173,7 @@ export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
       'Content-Type': 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${safeFilename}"`,
       'Content-Length': String(stat.size),
+      'Accept-Ranges': 'none',
     });
 
     const stream = fs.createReadStream(row.file_path);
@@ -217,7 +240,6 @@ export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
       | undefined;
     if (!row) throw new NotFoundError('IsoVersion', id);
 
-    // Check definition exists (for context in audit log)
     const defRow = db
       .prepare('SELECT name FROM iso_definitions WHERE id = ?')
       .get(row.definition_id) as IsoDefinitionRow | undefined;

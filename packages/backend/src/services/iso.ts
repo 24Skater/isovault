@@ -85,6 +85,21 @@ export interface CreateDefinitionDto {
 
 export type UpdateDefinitionDto = Partial<CreateDefinitionDto>;
 
+export interface CreateVersionDto {
+  definitionId: string;
+  versionString: string;
+  filename: string;
+  filePath: string;
+  sourceUrl: string;
+  status?: IsoStatus;
+  releaseDate?: string | null;
+  checksum?: string | null;
+  checksumVerified?: boolean;
+  fileSizeBytes?: number | null;
+  notes?: string | null;
+  downloadCompletedAt?: string | null;
+}
+
 // ─── iso_definitions CRUD ─────────────────────────────────────────────────────
 
 export interface ListDefinitionsParams {
@@ -289,4 +304,41 @@ export function getVersion(definitionId: string, versionId: string): IsoVersion 
     .get(versionId, definitionId) as IsoVersionRow | undefined;
   if (!row) throw new NotFoundError('IsoVersion', versionId);
   return rowToVersion(row);
+}
+
+export function createVersion(dto: CreateVersionDto): IsoVersion {
+  getDefinition(dto.definitionId); // 404 if definition doesn't exist
+
+  const db = getDb();
+  const id = uuidv4();
+  const now = new Date().toISOString();
+
+  db.prepare(
+    `INSERT INTO iso_versions
+       (id, definition_id, version_string, release_date, filename, file_path,
+        file_size_bytes, checksum, checksum_verified, status, source_url,
+        download_started_at, download_completed_at, archived_at, notes,
+        created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL, ?, ?, ?)`,
+  ).run(
+    id,
+    dto.definitionId,
+    dto.versionString,
+    dto.releaseDate ?? null,
+    dto.filename,
+    dto.filePath,
+    dto.fileSizeBytes ?? null,
+    dto.checksum ?? null,
+    dto.checksumVerified ? 1 : 0,
+    dto.status ?? 'pending',
+    dto.sourceUrl,
+    dto.downloadCompletedAt ?? null,
+    dto.notes ?? null,
+    now,
+    now,
+  );
+
+  return rowToVersion(
+    db.prepare('SELECT * FROM iso_versions WHERE id = ?').get(id) as IsoVersionRow,
+  );
 }

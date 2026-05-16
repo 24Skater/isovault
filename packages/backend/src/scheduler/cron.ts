@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import config from '../config';
 import { watcherService } from '../services/watcher';
+import { runCleanup } from '../services/cleanup';
 import { logEvent } from '../services/audit';
 import { getDb } from '../db/client';
 
@@ -70,10 +71,18 @@ class CronScheduler {
       }),
     );
 
-    // Cleanup sweep
+    // Cleanup sweep — audit log retention, stale job pruning, orphaned .part files
     this.tasks.push(
       cron.schedule(config.scheduler.cleanupCron, () => {
-        logEvent('scheduler.cleanup_skipped', null, null, { reason: 'not_implemented' });
+        void runCleanup().catch((err: unknown) => {
+          logEvent(
+            'scheduler.cleanup_error',
+            null,
+            null,
+            { message: err instanceof Error ? err.message : String(err) },
+            'error',
+          );
+        });
       }),
     );
   }

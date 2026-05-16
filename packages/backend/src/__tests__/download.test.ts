@@ -43,6 +43,13 @@ jest.mock('../services/storage', () => ({
   moveFile: jest.fn(),
   deleteFile: jest.fn(),
   ensureDefinitionDir: jest.fn(),
+  getStorageStats: jest.fn().mockReturnValue({
+    storagePath: '/tmp',
+    usedBytes: 1_000_000,
+    freeBytes: 50 * 1024 * 1024 * 1024,
+    totalBytes: 100 * 1024 * 1024 * 1024,
+    alertThresholdPercent: 80,
+  }),
 }));
 
 import { initDb, closeDb } from '../db/client';

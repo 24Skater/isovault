@@ -2,6 +2,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import multipart from '@fastify/multipart';
 import websocketPlugin from '@fastify/websocket';
 import path from 'path';
 import os from 'os';
@@ -20,6 +21,7 @@ import { settingsRoutes } from './routes/settings';
 import { storageRoutes } from './routes/storage';
 import { webhookRoutes } from './routes/webhooks';
 import { statsRoutes } from './routes/stats';
+import { importRoutes } from './routes/import';
 import { IsoManagerError } from './errors/base';
 import { initApiKey, verifyApiKey } from './services/auth';
 
@@ -70,6 +72,15 @@ export async function buildServer(): Promise<FastifyInstance> {
     theme: { title: 'IsoVault API' },
   });
 
+  await server.register(multipart, {
+    limits: {
+      fileSize: 50 * 1024 * 1024 * 1024, // 50 GB — ISOs can be large
+      files: 1,
+      fields: 10,
+      fieldSize: 4096,
+    },
+  });
+
   await server.register(websocketPlugin);
 
   // Serve frontend static files in production
@@ -81,37 +92,10 @@ export async function buildServer(): Promise<FastifyInstance> {
     });
   }
 
-  // ── Auth hook ────────────────────────────────────────────────────────────────
-
-  const PUBLIC_API_PATHS = new Set(['/health', '/ready', '/api/health']);
-  server.addHook('onRequest', async (request, reply) => {
-    const pathname = request.url.split('?')[0];
-    // Static files and health checks are publicly accessible
-    if (!pathname.startsWith('/api/') || PUBLIC_API_PATHS.has(pathname)) return;
-    const header = request.headers['authorization'] ?? '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-    if (!token || !(await verifyApiKey(token))) {
-      return reply.status(401).send({ error: 'Unauthorized' });
-    }
-  });
-
-  // ── Routes ───────────────────────────────────────────────────────────────────
-
-  await server.register(healthRoutes);
-  await server.register(definitionRoutes);
-  await server.register(versionRoutes);
-  await server.register(downloadRoutes);
-  await server.register(watcherRoutes);
-  await server.register(auditRoutes);
-  await server.register(settingsRoutes);
-  await server.register(storageRoutes);
-  await server.register(webhookRoutes);
-  await server.register(statsRoutes);
-
-  // ── Global error handler (RFC 7807) ─────────────────────────────────────────
+  // ── Global error handler (RFC 7807) — must be registered before routes ───────
 
   server.setErrorHandler((error, request, reply) => {
-    const requestId = request.id as string;
+    const requestId = String(request.id);
 
     if (error instanceof IsoManagerError) {
       request.log.warn({ err: error.toJSON(), requestId, path: request.url }, 'api.request_error');
@@ -149,6 +133,47 @@ export async function buildServer(): Promise<FastifyInstance> {
       requestId,
     });
   });
+
+  // ── Not-found handler (RFC 7807) ─────────────────────────────────────────────
+
+  server.setNotFoundHandler((request, reply) => {
+    const requestId = String(request.id);
+    return reply.status(404).send({
+      type: 'https://isovault.local/errors/not_found',
+      title: 'NOT_FOUND',
+      status: 404,
+      detail: `Route ${request.method}:${request.url} not found`,
+      requestId,
+    });
+  });
+
+  // ── Auth hook ────────────────────────────────────────────────────────────────
+
+  const PUBLIC_API_PATHS = new Set(['/health', '/ready', '/api/health']);
+  server.addHook('onRequest', async (request, reply) => {
+    const pathname = request.url.split('?')[0];
+    // Static files and health checks are publicly accessible
+    if (!pathname.startsWith('/api/') || PUBLIC_API_PATHS.has(pathname)) return;
+    const header = request.headers['authorization'] ?? '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    if (!token || !(await verifyApiKey(token))) {
+      return reply.status(401).send({ error: 'Unauthorized' });
+    }
+  });
+
+  // ── Routes ───────────────────────────────────────────────────────────────────
+
+  await server.register(healthRoutes);
+  await server.register(definitionRoutes);
+  await server.register(versionRoutes);
+  await server.register(downloadRoutes);
+  await server.register(watcherRoutes);
+  await server.register(auditRoutes);
+  await server.register(settingsRoutes);
+  await server.register(storageRoutes);
+  await server.register(webhookRoutes);
+  await server.register(statsRoutes);
+  await server.register(importRoutes);
 
   server.addHook('onClose', (_instance, done) => {
     downloadManager.stopPolling();
@@ -200,4 +225,7 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-start();
+// Only auto-start when this file is the process entry point (not when imported for testing)
+if (require.main === module) {
+  start();
+}
