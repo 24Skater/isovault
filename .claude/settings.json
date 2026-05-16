@@ -57,7 +57,8 @@
       "Bash(node node_modules/playwright/cli.js install chromium)",
       "Read(//c/Users/ramos/.cache/**)",
       "Read(//root/.cache/**)",
-      "Bash(node screenshot.mjs)"
+      "Bash(node screenshot.mjs)",
+      "Bash(node screenshot-swagger.mjs)"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills"

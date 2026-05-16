@@ -1,9 +1,12 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import websocketPlugin from '@fastify/websocket';
 import path from 'path';
 import os from 'os';
 import config from './config';
+import { openApiSpec } from './openapi';
 import { initDb, closeDb } from './db/client';
 import { healthRoutes } from './routes/health';
 import { definitionRoutes } from './routes/definitions';
@@ -53,6 +56,18 @@ export async function buildServer(): Promise<FastifyInstance> {
   await server.register(cors, {
     origin: config.server.corsOrigins,
     credentials: true,
+  });
+
+  await server.register(swagger, {
+    mode: 'static',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    specification: { document: openApiSpec as any },
+  });
+
+  await server.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: { docExpansion: 'list', deepLinking: true, persistAuthorization: true },
+    theme: { title: 'IsoVault API' },
   });
 
   await server.register(websocketPlugin);

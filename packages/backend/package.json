@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
-    "bcryptjs": "^2.4.3",
     "@fastify/static": "^7.0.4",
+    "@fastify/swagger": "^8.15.0",
+    "@fastify/swagger-ui": "^3.1.0",
     "@fastify/websocket": "^10.0.1",
+    "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.10.0",
     "fastify": "^4.28.1",
     "js-yaml": "^4.1.0",
@@ -69,7 +71,10 @@
     },
     "overrides": [
       {
-        "files": ["**/*.test.ts", "**/*.spec.ts"],
+        "files": [
+          "**/*.test.ts",
+          "**/*.spec.ts"
+        ],
         "rules": {
           "@typescript-eslint/no-var-requires": "off",
           "@typescript-eslint/no-require-imports": "off"

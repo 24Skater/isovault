@@ -227,6 +227,12 @@ ISO_MANAGER_API_KEY=your-secret-key
 
 All endpoints return JSON. Errors follow [RFC 7807](https://www.rfc-editor.org/rfc/rfc7807) and include a `requestId` field for log correlation.
 
+Interactive documentation is available at **[http://localhost:3721/docs](http://localhost:3721/docs)** once the server is running. Paste your API key into the **Authorize** dialog to try endpoints directly from the browser.
+
+<div align="center">
+  <img src="./docs/screenshot-swagger.png" alt="IsoVault Swagger UI" width="860" />
+</div>
+
 <details>
 <summary>Endpoints</summary>
 
@@ -234,12 +240,14 @@ All endpoints return JSON. Errors follow [RFC 7807](https://www.rfc-editor.org/r
 |---|---|:---:|---|
 | `GET` | `/health` | — | Liveness check — 200 if the process is running |
 | `GET` | `/ready` | — | Readiness check — 503 if DB or storage is unavailable |
+| `GET` | `/docs` | — | Interactive Swagger UI |
 | `GET` | `/api/stats` | ✓ | Aggregated dashboard statistics |
 | `GET` | `/api/definitions` | ✓ | List all ISO definitions |
 | `POST` | `/api/definitions` | ✓ | Create a definition |
 | `GET` | `/api/definitions/:id` | ✓ | Get a single definition |
-| `PATCH` | `/api/definitions/:id` | ✓ | Update a definition |
+| `PUT` | `/api/definitions/:id` | ✓ | Update a definition |
 | `DELETE` | `/api/definitions/:id` | ✓ | Delete a definition |
+| `POST` | `/api/definitions/:id/watch/trigger` | ✓ | Trigger a watcher check immediately |
 | `GET` | `/api/definitions/:id/versions` | ✓ | List versions for a definition |
 | `GET` | `/api/versions` | ✓ | Cross-definition version query (`?status=archived`) |
 | `GET` | `/api/versions/:id/download` | ✓ | Stream the ISO file |
@@ -249,13 +257,16 @@ All endpoints return JSON. Errors follow [RFC 7807](https://www.rfc-editor.org/r
 | `DELETE` | `/api/versions/:id` | ✓ | Permanently delete version and file |
 | `GET` | `/api/downloads` | ✓ | List active and queued jobs |
 | `POST` | `/api/downloads` | ✓ | Trigger a manual download |
+| `GET` | `/api/downloads/:id` | ✓ | Get a download job |
 | `DELETE` | `/api/downloads/:id` | ✓ | Cancel a download |
+| `GET` | `/api/watchers` | ✓ | List watch-enabled definitions |
 | `GET` | `/api/audit` | ✓ | Audit log (`?severity=warn&eventType=download.failed`) |
 | `GET` | `/api/settings` | ✓ | List all runtime settings |
 | `PUT` | `/api/settings/:key` | ✓ | Update a runtime setting |
 | `GET` | `/api/storage/stats` | ✓ | Disk usage for the ISO store |
 | `GET` | `/api/webhooks` | ✓ | List webhooks |
 | `POST` | `/api/webhooks` | ✓ | Register a webhook |
+| `GET` | `/api/webhooks/:id` | ✓ | Get a webhook |
 | `PATCH` | `/api/webhooks/:id` | ✓ | Update a webhook |
 | `DELETE` | `/api/webhooks/:id` | ✓ | Delete a webhook |
 | `POST` | `/api/webhooks/:id/test` | ✓ | Send a test event |
