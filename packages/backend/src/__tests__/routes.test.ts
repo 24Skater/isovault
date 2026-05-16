@@ -50,10 +50,24 @@ jest.mock('../services/webhook', () => ({
   dispatch: jest.fn().mockResolvedValue(undefined),
   listWebhooks: jest.fn().mockReturnValue([]),
   getWebhook: jest.fn().mockReturnValue(null),
-  createWebhook: jest.fn().mockResolvedValue({ id: 'wh-1', url: 'https://example.com/hook', events: ['download.completed'], enabled: true }),
+  createWebhook: jest
+    .fn()
+    .mockResolvedValue({
+      id: 'wh-1',
+      url: 'https://example.com/hook',
+      events: ['download.completed'],
+      enabled: true,
+    }),
   updateWebhook: jest.fn(),
   deleteWebhook: jest.fn(),
-  WEBHOOK_EVENTS: ['download.completed', 'download.failed', 'version.imported', 'definition.created', 'webhook.test', '*'],
+  WEBHOOK_EVENTS: [
+    'download.completed',
+    'download.failed',
+    'version.imported',
+    'definition.created',
+    'webhook.test',
+    '*',
+  ],
 }));
 
 // Stub download manager so tests don't start polling timers

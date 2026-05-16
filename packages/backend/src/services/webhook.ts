@@ -33,10 +33,7 @@ const WEBHOOK_EVENT_SET = new Set<string>(WEBHOOK_EVENTS);
 function validateEvents(events: string[]): void {
   const invalid = events.filter((e) => !WEBHOOK_EVENT_SET.has(e));
   if (invalid.length > 0) {
-    throw new ValidationError(
-      `Unknown webhook event types: ${invalid.join(', ')}`,
-      'events',
-    );
+    throw new ValidationError(`Unknown webhook event types: ${invalid.join(', ')}`, 'events');
   }
 }
 

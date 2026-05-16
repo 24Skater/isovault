@@ -11,7 +11,14 @@ import { deleteFile } from '../services/storage';
 import { computeFileChecksum } from '../utils/checksum';
 import { parsePagination } from '../utils/pagination';
 
-const VALID_STATUSES = new Set(['pending', 'downloading', 'active', 'archived', 'corrupt', 'deleted']);
+const VALID_STATUSES = new Set([
+  'pending',
+  'downloading',
+  'active',
+  'archived',
+  'corrupt',
+  'deleted',
+]);
 
 const paginationQuery = {
   type: 'object',

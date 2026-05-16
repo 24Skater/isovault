@@ -11,7 +11,12 @@ import { assertSafeUrl } from '../utils/ssrf';
 import { verifyFileChecksum } from '../utils/checksum';
 import { moveFile, deleteFile, getStorageStats } from './storage';
 import { logEvent } from './audit';
-import { ConflictError, NotFoundError, ChecksumMismatchError, ValidationError } from '../errors/base';
+import {
+  ConflictError,
+  NotFoundError,
+  ChecksumMismatchError,
+  ValidationError,
+} from '../errors/base';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -199,7 +204,8 @@ class DownloadManager {
       const storageStats = getStorageStats();
       if (
         storageStats.totalBytes !== null &&
-        storageStats.usedBytes / storageStats.totalBytes >= config.storage.alertThresholdPercent / 100
+        storageStats.usedBytes / storageStats.totalBytes >=
+          config.storage.alertThresholdPercent / 100
       ) {
         throw new ValidationError(
           `Disk usage has reached the alert threshold (${config.storage.alertThresholdPercent}%). Free up space before downloading.`,
