@@ -1,15 +1,16 @@
 import type { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import { pipeline } from 'stream/promises';
-import { listVersions, getVersion, rowToVersion } from '../services/iso';
+import { listVersions, getVersion, rowToVersion, createVersion } from '../services/iso';
 import { NotFoundError, ValidationError } from '../errors/base';
 import { getDb } from '../db/client';
 import type { IsoVersionRow, IsoDefinitionRow } from '../db/schema';
 import type { ChecksumAlgorithm } from '../types';
 import { logEvent } from '../services/audit';
-import { deleteFile } from '../services/storage';
+import { deleteFile, resolveVersionPath, ensureDefinitionDir } from '../services/storage';
 import { computeFileChecksum } from '../utils/checksum';
 import { parsePagination } from '../utils/pagination';
+import { downloadManager } from '../services/download';
 
 const VALID_STATUSES = new Set([
   'pending',
@@ -39,6 +40,57 @@ export async function versionRoutes(fastify: FastifyInstance): Promise<void> {
       const { page, limit } = parsePagination(query);
       const result = listVersions(definitionId, { page, limit });
       return { data: result.versions, total: result.total, page, limit };
+    },
+  });
+
+  // ── POST /api/definitions/:definitionId/versions — queue a manual download ──
+  fastify.post<{
+    Params: { definitionId: string };
+    Body: { versionString: string; sourceUrl: string; filename?: string };
+  }>('/api/definitions/:definitionId/versions', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['versionString', 'sourceUrl'],
+        properties: {
+          versionString: { type: 'string', minLength: 1, maxLength: 100 },
+          sourceUrl: { type: 'string', format: 'uri', maxLength: 2048 },
+          filename: { type: 'string', minLength: 1, maxLength: 255 },
+        },
+        additionalProperties: false,
+      },
+    },
+    handler: async (request, reply) => {
+      const { definitionId } = request.params;
+      const { versionString, sourceUrl, filename } = request.body;
+
+      const derivedFilename =
+        filename ??
+        new URL(sourceUrl).pathname.split('/').filter(Boolean).pop() ??
+        `${versionString}.iso`;
+
+      ensureDefinitionDir(definitionId);
+      const filePath = resolveVersionPath(definitionId, derivedFilename);
+
+      const version = createVersion({
+        definitionId,
+        versionString,
+        sourceUrl,
+        filename: derivedFilename,
+        filePath,
+        status: 'pending',
+      });
+
+      const job = await downloadManager.enqueue(version.id);
+
+      logEvent('version.imported', 'version', version.id, {
+        definitionId,
+        versionString,
+        sourceUrl,
+        jobId: job.id,
+      });
+
+      return reply.status(201).send({ version, job });
     },
   });
 

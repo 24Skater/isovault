@@ -13,7 +13,7 @@ export async function initApiKey(): Promise<void> {
   const existing = getSetting(API_KEY_SETTING);
   if (existing) return;
 
-  const envKey = process.env['ISO_MANAGER_API_KEY'];
+  const envKey = process.env['ISO_MANAGER_API_KEY'] || undefined;
   const plainKey = envKey ?? crypto.randomBytes(32).toString('hex');
   const hash = await bcrypt.hash(plainKey, BCRYPT_ROUNDS);
   setSetting(API_KEY_SETTING, hash);

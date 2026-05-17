@@ -88,6 +88,17 @@ export interface SettingRow {
   updated_at: string;
 }
 
+export interface IntegrationTokenRow {
+  id: string;
+  name: string;
+  description: string | null;
+  token_hash: string;
+  token_prefix: string | null; // first 8 hex chars — non-secret lookup key
+  created_at: string;
+  last_used_at: string | null;
+  revoked: number; // 0 | 1
+}
+
 export interface MigrationRow {
   id: number;
   name: string;

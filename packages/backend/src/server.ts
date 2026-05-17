@@ -22,8 +22,10 @@ import { storageRoutes } from './routes/storage';
 import { webhookRoutes } from './routes/webhooks';
 import { statsRoutes } from './routes/stats';
 import { importRoutes } from './routes/import';
+import { integrationRoutes } from './routes/integrations';
 import { IsoManagerError } from './errors/base';
 import { initApiKey, verifyApiKey } from './services/auth';
+import { verifyIntegrationToken } from './services/integrationTokens';
 
 // ─── Build server ─────────────────────────────────────────────────────────────
 
@@ -86,9 +88,16 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Serve frontend static files in production
   if (!isDev) {
     const staticPlugin = await import('@fastify/static');
+    const frontendRoot =
+      process.env['FRONTEND_DIST_PATH'] ?? path.join(__dirname, '../../frontend/dist');
     await server.register(staticPlugin.default, {
-      root: path.join(__dirname, '../../frontend/dist'),
+      root: frontendRoot,
       prefix: '/',
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('index.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        }
+      },
     });
   }
 
@@ -138,6 +147,15 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   server.setNotFoundHandler((request, reply) => {
     const requestId = String(request.id);
+
+    // SPA fallback: serve index.html for non-API GET requests so that
+    // hard-refreshing a client-side route (e.g. /catalog) works correctly.
+    if (!isDev && request.method === 'GET' && !request.url.startsWith('/api/')) {
+      const frontendRoot =
+        process.env['FRONTEND_DIST_PATH'] ?? path.join(__dirname, '../../frontend/dist');
+      return reply.sendFile('index.html', frontendRoot);
+    }
+
     return reply.status(404).send({
       type: 'https://isovault.local/errors/not_found',
       title: 'NOT_FOUND',
@@ -149,16 +167,43 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // ── Auth hook ────────────────────────────────────────────────────────────────
 
+  // Paths accessible without any token
   const PUBLIC_API_PATHS = new Set(['/health', '/ready', '/api/health']);
+
+  // Paths that integration tokens (read-only) are allowed to access.
+  // Intentionally narrow: catalog listing, version listing, and direct ISO downloads only.
+  const INTEGRATION_TOKEN_ALLOWED = (method: string, pathname: string): boolean => {
+    if (method !== 'GET') return false;
+    if (pathname.startsWith('/api/definitions')) return true;
+    if (pathname === '/api/versions') return true;
+    if (/^\/api\/versions\/[^/]+\/download$/.test(pathname)) return true;
+    return false;
+  };
+
   server.addHook('onRequest', async (request, reply) => {
     const pathname = request.url.split('?')[0];
     // Static files and health checks are publicly accessible
     if (!pathname.startsWith('/api/') || PUBLIC_API_PATHS.has(pathname)) return;
     const header = request.headers['authorization'] ?? '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-    if (!token || !(await verifyApiKey(token))) {
-      return reply.status(401).send({ error: 'Unauthorized' });
+    let token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    // WebSocket upgrades and tools that can't set headers pass token via query string
+    if (!token) {
+      const qs = request.query as Record<string, string>;
+      token = qs['token'] ?? '';
     }
+    if (!token) return reply.status(401).send({ error: 'Unauthorized' });
+
+    // Main API key grants full access
+    if (await verifyApiKey(token)) return;
+
+    // Integration token grants read-only access to catalog/download endpoints
+    if (
+      INTEGRATION_TOKEN_ALLOWED(request.method, pathname) &&
+      (await verifyIntegrationToken(token))
+    )
+      return;
+
+    return reply.status(401).send({ error: 'Unauthorized' });
   });
 
   // ── Routes ───────────────────────────────────────────────────────────────────
@@ -174,6 +219,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   await server.register(webhookRoutes);
   await server.register(statsRoutes);
   await server.register(importRoutes);
+  await server.register(integrationRoutes);
 
   server.addHook('onClose', (_instance, done) => {
     downloadManager.stopPolling();

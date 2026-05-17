@@ -50,14 +50,12 @@ jest.mock('../services/webhook', () => ({
   dispatch: jest.fn().mockResolvedValue(undefined),
   listWebhooks: jest.fn().mockReturnValue([]),
   getWebhook: jest.fn().mockReturnValue(null),
-  createWebhook: jest
-    .fn()
-    .mockResolvedValue({
-      id: 'wh-1',
-      url: 'https://example.com/hook',
-      events: ['download.completed'],
-      enabled: true,
-    }),
+  createWebhook: jest.fn().mockResolvedValue({
+    id: 'wh-1',
+    url: 'https://example.com/hook',
+    events: ['download.completed'],
+    enabled: true,
+  }),
   updateWebhook: jest.fn(),
   deleteWebhook: jest.fn(),
   WEBHOOK_EVENTS: [
@@ -528,6 +526,208 @@ describe('PUT /api/settings/:key', () => {
       payload: { value: '5' },
     });
     expect(res.statusCode).toBe(404);
+  });
+});
+
+// ─── Integration tokens ───────────────────────────────────────────────────────
+
+describe('GET /api/integrations/tokens', () => {
+  it('returns empty array initially', async () => {
+    const res = await server.inject({
+      method: 'GET',
+      url: '/api/integrations/tokens',
+      headers: auth,
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json<unknown[]>();
+    expect(Array.isArray(body)).toBe(true);
+  });
+
+  it('returns 401 without auth', async () => {
+    const res = await server.inject({ method: 'GET', url: '/api/integrations/tokens' });
+    expect(res.statusCode).toBe(401);
+  });
+});
+
+describe('POST /api/integrations/tokens', () => {
+  it('creates a token and returns plaintext once', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: 'Test Token', description: 'For testing' },
+    });
+    expect(res.statusCode).toBe(201);
+    const body = res.json<{ id: string; name: string; token: string; revoked: boolean }>();
+    expect(typeof body.id).toBe('string');
+    expect(body.name).toBe('Test Token');
+    expect(typeof body.token).toBe('string');
+    expect(body.token.length).toBeGreaterThan(0);
+    expect(body.revoked).toBe(false);
+  });
+
+  it('returns 400 when name is missing', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { description: 'No name' },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('returns 400 when name is blank', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: '   ' },
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('returns 401 without auth', async () => {
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { 'content-type': 'application/json' },
+      payload: { name: 'Unauthorized Token' },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+});
+
+describe('PATCH /api/integrations/tokens/:id/revoke', () => {
+  it('revokes an active token', async () => {
+    const createRes = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: 'Revoke Me' },
+    });
+    const { id } = createRes.json<{ id: string }>();
+
+    const revokeRes = await server.inject({
+      method: 'PATCH',
+      url: `/api/integrations/tokens/${id}/revoke`,
+      headers: auth,
+    });
+    expect(revokeRes.statusCode).toBe(204);
+
+    // Token should now appear as revoked in the list
+    const listRes = await server.inject({
+      method: 'GET',
+      url: '/api/integrations/tokens',
+      headers: auth,
+    });
+    const tokens = listRes.json<Array<{ id: string; revoked: boolean }>>();
+    const tok = tokens.find((t) => t.id === id);
+    expect(tok?.revoked).toBe(true);
+  });
+
+  it('returns 404 for unknown token', async () => {
+    const res = await server.inject({
+      method: 'PATCH',
+      url: '/api/integrations/tokens/00000000-0000-0000-0000-000000000000/revoke',
+      headers: auth,
+    });
+    expect(res.statusCode).toBe(404);
+  });
+
+  it('returns 404 when revoking an already-revoked token', async () => {
+    const createRes = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: 'Already Revoked' },
+    });
+    const { id } = createRes.json<{ id: string }>();
+
+    await server.inject({
+      method: 'PATCH',
+      url: `/api/integrations/tokens/${id}/revoke`,
+      headers: auth,
+    });
+
+    const res = await server.inject({
+      method: 'PATCH',
+      url: `/api/integrations/tokens/${id}/revoke`,
+      headers: auth,
+    });
+    expect(res.statusCode).toBe(404);
+  });
+});
+
+describe('DELETE /api/integrations/tokens/:id', () => {
+  it('hard-deletes a token', async () => {
+    const createRes = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: 'Delete Me' },
+    });
+    const { id } = createRes.json<{ id: string }>();
+
+    const deleteRes = await server.inject({
+      method: 'DELETE',
+      url: `/api/integrations/tokens/${id}`,
+      headers: auth,
+    });
+    expect(deleteRes.statusCode).toBe(204);
+
+    const listRes = await server.inject({
+      method: 'GET',
+      url: '/api/integrations/tokens',
+      headers: auth,
+    });
+    const tokens = listRes.json<Array<{ id: string }>>();
+    expect(tokens.find((t) => t.id === id)).toBeUndefined();
+  });
+
+  it('returns 404 for unknown token', async () => {
+    const res = await server.inject({
+      method: 'DELETE',
+      url: '/api/integrations/tokens/00000000-0000-0000-0000-000000000000',
+      headers: auth,
+    });
+    expect(res.statusCode).toBe(404);
+  });
+});
+
+describe('integration token read-only access', () => {
+  it('allows GET /api/definitions with a valid integration token', async () => {
+    const createRes = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: 'Read-only Token' },
+    });
+    const { token } = createRes.json<{ token: string }>();
+
+    const res = await server.inject({
+      method: 'GET',
+      url: '/api/definitions',
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('denies POST with an integration token (write blocked)', async () => {
+    const createRes = await server.inject({
+      method: 'POST',
+      url: '/api/integrations/tokens',
+      headers: { ...auth, 'content-type': 'application/json' },
+      payload: { name: 'Write-block Token' },
+    });
+    const { token } = createRes.json<{ token: string }>();
+
+    const res = await server.inject({
+      method: 'POST',
+      url: '/api/definitions',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      payload: { name: 'Blocked', family: 'linux', architecture: 'x86_64' },
+    });
+    expect(res.statusCode).toBe(401);
   });
 });
 

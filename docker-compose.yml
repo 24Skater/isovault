@@ -9,14 +9,20 @@ services:
     ports:
       - "3721:3721"
     volumes:
-      - /path/to/iso-store:/data/iso-store
+      # To use a host path instead of the named volume, replace the line below with:
+      #   - /your/host/path:/data/iso-store
+      - isovault-store:/data/iso-store
       - isovault-db:/data/db
       - ./config.yaml:/app/config.yaml:ro
-      - /tmp/isovault:/tmp/isovault
+      - isovault-tmp:/tmp/isovault
     environment:
       NODE_ENV: production
+      # Set this in your shell or a .env file to use a known key; omit to auto-generate
       ISO_MANAGER_API_KEY: ${ISO_MANAGER_API_KEY:-}
       ISO_STORE_PATH: /data/iso-store
+      # Pin the DB path so it stays in its own volume regardless of ISO_STORE_PATH
+      ISO_MANAGER_DB_PATH: /data/db/iso-manager.sqlite3
+      FRONTEND_DIST_PATH: /app/frontend/dist
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3721/health"]
       interval: 30s
@@ -25,4 +31,6 @@ services:
       start_period: 10s
 
 volumes:
+  isovault-store:
   isovault-db:
+  isovault-tmp:

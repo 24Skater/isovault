@@ -4,6 +4,7 @@ import type {
   WsVersionDetectedEvent,
   WsEvent,
 } from '../api/downloads';
+import { getApiKey } from '../api/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,7 +42,9 @@ export function useDownloadProgress({
     if (!mountedRef.current) return;
 
     const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${proto}//${window.location.host}/api/ws`);
+    const key = getApiKey();
+    const qs = key ? `?token=${encodeURIComponent(key)}` : '';
+    const ws = new WebSocket(`${proto}//${window.location.host}/api/ws${qs}`);
     wsRef.current = ws;
 
     ws.onopen = () => {

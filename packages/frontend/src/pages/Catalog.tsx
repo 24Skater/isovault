@@ -14,6 +14,7 @@ import {
 } from '../api/definitions';
 import VersionTimeline from '../components/VersionTimeline';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { ImportIsoModal } from '../components/ImportIsoModal';
 
 // ─── Shared input style ───────────────────────────────────────────────────────
 
@@ -450,7 +451,11 @@ const btnStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-export default function Catalog() {
+interface CatalogProps {
+  onNotify?: (type: 'success' | 'error', message: string) => void;
+}
+
+export default function Catalog({ onNotify }: CatalogProps) {
   const [definitions, setDefinitions] = useState<IsoDefinition[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -459,6 +464,7 @@ export default function Catalog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalMode>(null);
+  const [showImport, setShowImport] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<IsoDefinition | null>(null);
 
   useEffect(() => {
@@ -518,23 +524,42 @@ export default function Catalog() {
             {total}
           </span>
         </h1>
-        <button
-          onClick={() => setModal({ type: 'add' })}
-          style={{
-            padding: '6px 14px',
-            background: 'var(--accent)',
-            color: '#080808',
-            border: 'none',
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            cursor: 'pointer',
-          }}
-        >
-          + Add Definition
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => setShowImport(true)}
+            style={{
+              padding: '6px 14px',
+              background: 'transparent',
+              color: 'var(--accent)',
+              border: '1px solid var(--accent)',
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              cursor: 'pointer',
+            }}
+          >
+            ↑ Import ISO
+          </button>
+          <button
+            onClick={() => setModal({ type: 'add' })}
+            style={{
+              padding: '6px 14px',
+              background: 'var(--accent)',
+              color: '#080808',
+              border: 'none',
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              cursor: 'pointer',
+            }}
+          >
+            + Add Definition
+          </button>
+        </div>
       </div>
       <div className="page-rule" />
 
@@ -704,9 +729,21 @@ export default function Catalog() {
                 ✕
               </button>
             </div>
-            <VersionTimeline definitionId={modal.def.id} />
+            <VersionTimeline definition={modal.def} />
           </div>
         </div>
+      )}
+
+      {/* Import ISO modal */}
+      {showImport && (
+        <ImportIsoModal
+          onClose={() => setShowImport(false)}
+          onDone={() => {
+            setShowImport(false);
+            void load();
+            onNotify?.('success', 'ISO imported and added to catalog.');
+          }}
+        />
       )}
 
       {/* Confirm delete */}

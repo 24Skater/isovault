@@ -70,7 +70,19 @@
       "Bash(cat .babelrc)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\packages\\\\backend\\\\src\" -Recurse -File)",
       "Bash(Select-Object FullName)",
-      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && head -50 {}')"
+      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && head -50 {}')",
+      "Bash(docker compose *)",
+      "Bash(docker run *)",
+      "PowerShell(docker run --rm --entrypoint ls isovault:latest /app/)",
+      "PowerShell(docker run --rm --entrypoint ls isovault:latest /app/frontend/)",
+      "PowerShell(docker compose up -d --build 2>&1)",
+      "PowerShell(docker compose logs --tail=40 2>&1 | Where-Object { $_ -notmatch \"incoming request|request completed\" })",
+      "PowerShell(docker compose logs 2>&1)",
+      "PowerShell(docker compose build --no-cache 2>&1)",
+      "PowerShell(docker compose build --no-cache 2>&1 | Where-Object { $_ -match \"error|Error|npm|warn\" } | Select-Object -Last 20)",
+      "PowerShell(docker compose up -d 2>&1)",
+      "Skill(feature-dev)",
+      "Skill(feature-dev:*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills"

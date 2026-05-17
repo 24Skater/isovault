@@ -74,25 +74,7 @@ export type UpdateDefinitionDto = Partial<CreateDefinitionDto>;
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
-const BASE = '/api';
-
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error((err as { detail?: string }).detail ?? res.statusText);
-  }
-
-  if (res.status === 204) return undefined as unknown as T;
-  return res.json() as Promise<T>;
-}
+import { request, getApiKey, UnauthorizedError } from './client';
 
 // ─── Definitions API ──────────────────────────────────────────────────────────
 
@@ -151,4 +133,39 @@ export async function fetchVersions(
   if (params.limit !== undefined) qs.set('limit', String(params.limit));
   const q = qs.toString() ? `?${qs.toString()}` : '';
   return request<PaginatedResponse<IsoVersion>>(`/definitions/${definitionId}/versions${q}`);
+}
+
+export async function importVersion(
+  definitionId: string,
+  file: File,
+  versionString: string,
+): Promise<IsoVersion> {
+  const key = getApiKey();
+  const form = new FormData();
+  form.append('versionString', versionString);
+  form.append('file', file);
+  const res = await fetch(`/api/definitions/${definitionId}/versions/import`, {
+    method: 'POST',
+    headers: key ? { Authorization: `Bearer ${key}` } : {},
+    body: form,
+  });
+  if (res.status === 401) {
+    (window as Window & { __onUnauthorized?: () => void }).__onUnauthorized?.();
+    throw new UnauthorizedError();
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error((err as { detail?: string }).detail ?? res.statusText);
+  }
+  return res.json() as Promise<IsoVersion>;
+}
+
+export async function queueVersionDownload(
+  definitionId: string,
+  dto: { versionString: string; sourceUrl: string; filename?: string },
+): Promise<{ version: IsoVersion }> {
+  return request(`/definitions/${definitionId}/versions`, {
+    method: 'POST',
+    body: JSON.stringify(dto),
+  });
 }
