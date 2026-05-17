@@ -265,7 +265,7 @@ function AppShell() {
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, paddingTop: 8, paddingBottom: 8 }}>
+        <nav aria-label="Main navigation" style={{ flex: 1, paddingTop: 8, paddingBottom: 8 }}>
           {NAV_SECTIONS.map((section) => (
             <div key={section.label} style={{ marginBottom: 4 }}>
               <div style={{
@@ -405,7 +405,12 @@ export default function App() {
     setAuthed(false);
   }, []);
 
-  (window as Window & { __onUnauthorized?: () => void }).__onUnauthorized = handleUnauthorized;
+  useEffect(() => {
+    (window as Window & { __onUnauthorized?: () => void }).__onUnauthorized = handleUnauthorized;
+    return () => {
+      delete (window as Window & { __onUnauthorized?: () => void }).__onUnauthorized;
+    };
+  }, [handleUnauthorized]);
 
   if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
 
