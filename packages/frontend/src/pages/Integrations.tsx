@@ -65,7 +65,10 @@ function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
-      onClick={() => { void navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); }}
+      onClick={() => {
+        if (!navigator.clipboard) return;
+        void navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
+      }}
       style={{
         padding: '4px 10px',
         background: 'transparent',
@@ -225,7 +228,6 @@ function CreateTokenModal({ onClose, onCreated }: {
         description.trim() || undefined,
       );
       setCreatedToken(created.token);
-      onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create token.');
     } finally {
@@ -304,7 +306,10 @@ function CreateTokenModal({ onClose, onCreated }: {
                   {createdToken}
                 </code>
                 <button
-                  onClick={() => void navigator.clipboard.writeText(createdToken)}
+                  onClick={() => {
+                    if (!navigator.clipboard) return;
+                    void navigator.clipboard.writeText(createdToken);
+                  }}
                   style={{
                     padding: '4px 10px',
                     background: 'var(--accent)',
@@ -324,7 +329,7 @@ function CreateTokenModal({ onClose, onCreated }: {
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
               <button
-                onClick={onClose}
+                onClick={() => { onCreated(); onClose(); }}
                 style={{
                   padding: '7px 14px',
                   background: 'var(--accent)',
@@ -344,8 +349,9 @@ function CreateTokenModal({ onClose, onCreated }: {
         ) : (
           <form onSubmit={(e) => void handleSubmit(e)}>
             <div style={{ marginBottom: 14 }}>
-              <span style={labelStyle}>Token name *</span>
+              <label htmlFor="token-name" style={labelStyle}>Token name *</label>
               <input
+                id="token-name"
                 autoFocus
                 value={name}
                 onChange={e => setName(e.target.value)}
@@ -354,10 +360,11 @@ function CreateTokenModal({ onClose, onCreated }: {
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <span style={labelStyle}>
+              <label htmlFor="token-description" style={labelStyle}>
                 Description <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>optional</span>
-              </span>
+              </label>
               <input
+                id="token-description"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="e.g. Homelab PVE node"
@@ -486,11 +493,13 @@ export default function Integrations() {
   useEffect(() => { void load(); }, [load]);
 
   async function handleRevoke(id: string) {
+    setError(null);
     try { await revokeIntegrationToken(id); await load(); }
     catch (err) { setError(err instanceof Error ? err.message : 'Failed to revoke.'); }
   }
 
   async function handleDelete(id: string) {
+    setError(null);
     try { await deleteIntegrationToken(id); await load(); }
     catch (err) { setError(err instanceof Error ? err.message : 'Failed to delete.'); }
   }
