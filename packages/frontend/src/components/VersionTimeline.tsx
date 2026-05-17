@@ -10,7 +10,7 @@ const STATUS_BORDER: Record<IsoStatus, string> = {
   downloading: 'var(--accent)',
   active:      'var(--color-success)',
   archived:    'var(--border-strong)',
-  corrupt:     'var(--color-error)',
+  corrupt:     'var(--color-danger)',
   deleted:     'var(--border-strong)',
 };
 
@@ -19,7 +19,7 @@ const STATUS_COLOR: Record<IsoStatus, string> = {
   downloading: 'var(--accent)',
   active:      'var(--color-success)',
   archived:    'var(--text-muted)',
-  corrupt:     'var(--color-error)',
+  corrupt:     'var(--color-danger)',
   deleted:     'var(--text-muted)',
 };
 
@@ -53,16 +53,18 @@ function formatDate(iso: string | null): string {
 // ─── Version row ──────────────────────────────────────────────────────────────
 
 function VersionRow({ version, isLast }: { version: IsoVersion; isLast: boolean }) {
+  const isActive = version.status === 'active';
   return (
     <div style={{ display: 'flex', gap: 16 }}>
       {/* Timeline stem */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: 20 }}>
         <div style={{
-          width: 8,
-          height: 8,
-          marginTop: 4,
+          width: 9,
+          height: 9,
+          marginTop: 5,
           flexShrink: 0,
-          background: version.status === 'active' ? 'var(--color-success)' : 'var(--border-default)',
+          borderRadius: '50%',
+          background: isActive ? 'var(--accent)' : 'var(--border-default)',
         }} />
         {!isLast && (
           <div style={{ flex: 1, width: 1, marginTop: 4, background: 'var(--border-subtle)' }} />
@@ -70,11 +72,23 @@ function VersionRow({ version, isLast }: { version: IsoVersion; isLast: boolean 
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, paddingBottom: 20 }}>
+      <div style={{
+        flex: 1,
+        marginBottom: 14,
+        padding: '12px 14px',
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-md)',
+      }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>
+              <span style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+              }}>
                 {version.versionString}
               </span>
               <StatusBadge status={version.status} />
@@ -88,25 +102,25 @@ function VersionRow({ version, isLast }: { version: IsoVersion; isLast: boolean 
               )}
             </div>
             <div style={{
-              fontFamily: 'ui-monospace, monospace',
+              fontFamily: 'var(--font-mono)',
               fontSize: 11,
-              marginTop: 3,
+              marginTop: 4,
               color: 'var(--text-muted)',
             }}>
               {version.filename}
             </div>
           </div>
           <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
               {formatBytes(version.fileSizeBytes)}
             </div>
-            <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, marginTop: 2, color: 'var(--text-muted)' }}>
               {formatDate(version.downloadCompletedAt ?? version.createdAt)}
             </div>
           </div>
         </div>
         {version.notes && (
-          <p style={{ fontSize: 12, marginTop: 6, color: 'var(--text-secondary)' }}>
+          <p style={{ fontSize: 12, marginTop: 8, color: 'var(--text-secondary)' }}>
             {version.notes}
           </p>
         )}
@@ -120,14 +134,14 @@ function VersionRow({ version, isLast }: { version: IsoVersion; isLast: boolean 
 const LIMIT = 10;
 
 const btnStyle: React.CSSProperties = {
-  padding: '4px 12px',
+  padding: '5px 10px',
   background: 'transparent',
   color: 'var(--text-secondary)',
   border: '1px solid var(--border-default)',
-  fontFamily: 'ui-monospace, monospace',
-  fontSize: 10,
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
+  borderRadius: 'var(--radius-md)',
+  fontFamily: 'var(--font-sans)',
+  fontSize: 12,
+  fontWeight: 500,
   cursor: 'pointer',
 };
 
@@ -157,31 +171,38 @@ function QueueDownloadForm({ definition, onQueued }: { definition: IsoDefinition
   }
 
   const fieldStyle: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', padding: '6px 8px',
+    width: '100%', boxSizing: 'border-box', padding: '7px 9px',
     background: 'var(--bg-base)', border: '1px solid var(--border-default)',
-    color: 'var(--text-primary)', fontFamily: 'ui-monospace, monospace', fontSize: 11, outline: 'none',
+    borderRadius: 'var(--radius-sm)',
+    color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 12, outline: 'none',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
+    color: 'var(--text-secondary)', marginBottom: 5,
   };
 
   return (
     <form onSubmit={(e) => void handleSubmit(e)} style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
       <div>
-        <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 4 }}>
+        <div style={labelStyle}>
           Version string
         </div>
         <input value={version} onChange={e => setVersion(e.target.value)} placeholder="e.g. 24.04.2" style={fieldStyle} />
       </div>
       <div>
-        <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 4 }}>
+        <div style={labelStyle}>
           Download URL
         </div>
         <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://…" style={fieldStyle} />
       </div>
-      {error && <div style={{ fontSize: 11, color: 'var(--color-error)' }}>{error}</div>}
+      {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{error}</div>}
       <button type="submit" disabled={saving} style={{
-        alignSelf: 'flex-start', padding: '6px 16px',
-        background: 'var(--accent)', color: '#080808', border: 'none',
-        fontFamily: 'ui-monospace, monospace', fontSize: 10, fontWeight: 700,
-        textTransform: 'uppercase', letterSpacing: '0.08em', cursor: saving ? 'not-allowed' : 'pointer',
+        alignSelf: 'flex-start', padding: '7px 16px',
+        background: 'var(--accent)', color: 'var(--accent-fg)', border: 'none',
+        borderRadius: 'var(--radius-md)',
+        fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600,
+        cursor: saving ? 'not-allowed' : 'pointer',
         opacity: saving ? 0.7 : 1,
       }}>
         {saving ? 'Queuing…' : 'Queue Download'}
@@ -227,14 +248,15 @@ function UploadIsoForm({ definition, onUploaded }: { definition: IsoDefinition; 
   }
 
   const fieldStyle: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', padding: '6px 8px',
+    width: '100%', boxSizing: 'border-box', padding: '7px 9px',
     background: 'var(--bg-base)', border: '1px solid var(--border-default)',
-    color: 'var(--text-primary)', fontFamily: 'ui-monospace, monospace', fontSize: 11, outline: 'none',
+    borderRadius: 'var(--radius-sm)',
+    color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: 12, outline: 'none',
   };
 
   const labelStyle: React.CSSProperties = {
-    fontFamily: 'ui-monospace, monospace', fontSize: 10, textTransform: 'uppercase',
-    letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: 4, display: 'block',
+    fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
+    color: 'var(--text-secondary)', marginBottom: 5, display: 'block',
   };
 
   return (
@@ -246,17 +268,18 @@ function UploadIsoForm({ definition, onUploaded }: { definition: IsoDefinition; 
           onClick={() => inputRef.current?.click()}
           style={{
             padding: '10px 12px', border: '1px dashed var(--border-default)',
+            borderRadius: 'var(--radius-md)',
             cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
           }}
         >
-          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--accent)' }}>
             Choose file
           </span>
-          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: file ? 'var(--text-primary)' : 'var(--text-disabled)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: file ? 'var(--text-primary)' : 'var(--text-disabled)' }}>
             {file ? file.name : 'No file selected'}
           </span>
           {file && (
-            <span style={{ marginLeft: 'auto', fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+            <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
               {(file.size / 1024 / 1024).toFixed(0)} MB
             </span>
           )}
@@ -286,9 +309,9 @@ function UploadIsoForm({ definition, onUploaded }: { definition: IsoDefinition; 
               onChange={e => setAlsoQueue(e.target.checked)}
               style={{ marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0 }}
             />
-            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               Also queue download from source URL
-              <span style={{ display: 'block', color: 'var(--text-muted)', marginTop: 1, fontSize: 9, wordBreak: 'break-all' }}>
+              <span style={{ display: 'block', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', marginTop: 2, fontSize: 11, wordBreak: 'break-all' }}>
                 {definition.sourceUrl}
               </span>
             </span>
@@ -307,13 +330,13 @@ function UploadIsoForm({ definition, onUploaded }: { definition: IsoDefinition; 
         </div>
       )}
 
-      {error && <div style={{ fontSize: 11, color: 'var(--color-error)' }}>{error}</div>}
+      {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{error}</div>}
 
       <button type="submit" disabled={uploading} style={{
-        alignSelf: 'flex-start', padding: '6px 16px',
-        background: 'var(--accent)', color: '#080808', border: 'none',
-        fontFamily: 'ui-monospace, monospace', fontSize: 10, fontWeight: 700,
-        textTransform: 'uppercase', letterSpacing: '0.08em',
+        alignSelf: 'flex-start', padding: '7px 16px',
+        background: 'var(--accent)', color: 'var(--accent-fg)', border: 'none',
+        borderRadius: 'var(--radius-md)',
+        fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600,
         cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.7 : 1,
       }}>
         {uploading ? 'Uploading…' : 'Upload ISO'}
@@ -353,7 +376,7 @@ export default function VersionTimeline({ definition }: Props) {
 
   if (loading) {
     return (
-      <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '16px 0', color: 'var(--text-muted)' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, padding: '16px 0', color: 'var(--text-muted)' }}>
         Loading versions…
       </p>
     );
@@ -361,7 +384,7 @@ export default function VersionTimeline({ definition }: Props) {
 
   if (error) {
     return (
-      <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '16px 0', color: 'var(--color-error)' }}>
+      <p style={{ fontFamily: 'var(--font-mono)', fontSize: 12, padding: '16px 0', color: 'var(--color-danger)' }}>
         {error}
       </p>
     );
@@ -370,34 +393,34 @@ export default function VersionTimeline({ definition }: Props) {
   if (versions.length === 0) {
     return (
       <div>
-        <p style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
           No versions yet. Upload an ISO you already have or queue a download.
         </p>
         {activeForm === null && (
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setActiveForm('upload')} style={{
-              padding: '6px 14px', background: 'var(--accent)', color: '#080808', border: 'none',
-              fontFamily: 'ui-monospace, monospace', fontSize: 10, fontWeight: 700,
-              textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer',
+              padding: '7px 14px', background: 'var(--accent)', color: 'var(--accent-fg)', border: 'none',
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, cursor: 'pointer',
             }}>
               ↑ Upload ISO
             </button>
             <button onClick={() => setActiveForm('download')} style={{
-              padding: '6px 14px', background: 'transparent', color: 'var(--accent)',
-              border: '1px solid var(--accent)', fontFamily: 'ui-monospace, monospace',
-              fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer',
+              padding: '7px 14px', background: 'transparent', color: 'var(--text-secondary)',
+              border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 500, cursor: 'pointer',
             }}>
               ↓ Queue Download
             </button>
           </div>
         )}
         {activeForm === 'download' && (
-          <div style={{ padding: '12px', border: '1px solid var(--border-default)' }}>
+          <div style={{ padding: '12px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
             <QueueDownloadForm definition={definition} onQueued={() => { setActiveForm(null); load(); }} />
           </div>
         )}
         {activeForm === 'upload' && (
-          <div style={{ padding: '12px', border: '1px solid var(--border-default)' }}>
+          <div style={{ padding: '12px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
             <UploadIsoForm definition={definition} onUploaded={() => { setActiveForm(null); load(); }} />
           </div>
         )}
@@ -411,24 +434,24 @@ export default function VersionTimeline({ definition }: Props) {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <p style={{
-          fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)',
-          textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0,
+          fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)',
+          margin: 0,
         }}>
           {total} version{total !== 1 ? 's' : ''}
         </p>
         {activeForm === null && (
           <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => setActiveForm('upload')} style={{
-              padding: '4px 10px', background: 'transparent', color: 'var(--text-secondary)',
-              border: '1px solid var(--border-default)', fontFamily: 'ui-monospace, monospace',
-              fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', cursor: 'pointer',
+              padding: '5px 10px', background: 'transparent', color: 'var(--text-secondary)',
+              border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 500, cursor: 'pointer',
             }}>
               ↑ Upload
             </button>
             <button onClick={() => setActiveForm('download')} style={{
-              padding: '4px 10px', background: 'transparent', color: 'var(--accent)',
-              border: '1px solid var(--accent)', fontFamily: 'ui-monospace, monospace',
-              fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', cursor: 'pointer',
+              padding: '5px 10px', background: 'transparent', color: 'var(--text-secondary)',
+              border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 500, cursor: 'pointer',
             }}>
               ↓ Download
             </button>
@@ -436,9 +459,9 @@ export default function VersionTimeline({ definition }: Props) {
         )}
       </div>
       {activeForm !== null && (
-        <div style={{ marginBottom: 20, padding: '12px', border: '1px solid var(--border-default)' }}>
+        <div style={{ marginBottom: 20, padding: '12px', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent)' }}>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>
               {activeForm === 'upload' ? '↑ Upload ISO' : '↓ Queue Download'}
             </span>
             <button onClick={() => setActiveForm(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14 }}>✕</button>
@@ -458,7 +481,7 @@ export default function VersionTimeline({ definition }: Props) {
 
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
             Page {page} of {totalPages}
           </span>
           <div style={{ display: 'flex', gap: 6 }}>
