@@ -21,10 +21,11 @@ export function ToastContainer({ toasts, onDismiss }: {
 
   if (toasts.length === 0) return null;
 
-  const borderColor: Record<Toast['type'], string> = {
+  const borderColor: Record<string, string> = {
     success: 'var(--color-success)',
-    error: 'var(--color-error)',
-    info: 'var(--accent)',
+    error: 'var(--color-danger)',
+    warning: 'var(--color-warning)',
+    info: 'var(--border-default)',
   };
 
   return (
@@ -47,21 +48,22 @@ export function ToastContainer({ toasts, onDismiss }: {
           background: 'var(--bg-surface)',
           border: `1px solid ${borderColor[toast.type]}`,
           borderLeft: `3px solid ${borderColor[toast.type]}`,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
-          animation: 'fadeInUp 150ms ease',
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: 'var(--shadow-md)',
+          animation: 'slideInUp 140ms ease-out',
         }}>
           <span style={{
-            fontFamily: 'ui-monospace, monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: 11,
-            color: borderColor[toast.type],
+            color: toast.type === 'info' ? 'var(--accent)' : borderColor[toast.type],
             flexShrink: 0,
             marginTop: 1,
           }}>
             {toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : '·'}
           </span>
           <span style={{
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 11,
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
             color: 'var(--text-primary)',
             flex: 1,
             lineHeight: 1.5,

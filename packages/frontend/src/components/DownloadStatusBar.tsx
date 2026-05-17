@@ -30,8 +30,8 @@ export function DownloadStatusBar({ activeCount, progressMap }: Props) {
         marginBottom: 6,
       }}>
         <span style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 10,
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
           textTransform: 'uppercase',
           letterSpacing: '0.06em',
           color: 'var(--accent)',
@@ -40,7 +40,7 @@ export function DownloadStatusBar({ activeCount, progressMap }: Props) {
         </span>
         {speed !== null && speed > 0 && (
           <span style={{
-            fontFamily: 'ui-monospace, monospace',
+            fontFamily: 'var(--font-mono)',
             fontSize: 10,
             color: 'var(--text-muted)',
           }}>
@@ -50,7 +50,7 @@ export function DownloadStatusBar({ activeCount, progressMap }: Props) {
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 3, background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+      <div style={{ height: 3, background: 'var(--bg-elevated)', borderRadius: 2, overflow: 'hidden' }}>
         <div style={{
           height: '100%',
           background: 'var(--accent)',
@@ -64,7 +64,7 @@ export function DownloadStatusBar({ activeCount, progressMap }: Props) {
       {bytes !== null && (
         <div style={{
           marginTop: 4,
-          fontFamily: 'ui-monospace, monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 10,
           color: 'var(--text-muted)',
         }}>

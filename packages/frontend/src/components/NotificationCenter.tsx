@@ -65,7 +65,7 @@ function NotificationItem({ n, onMarkRead }: { n: AppNotification; onMarkRead: (
     >
       <span style={{
         color: typeColor[n.type],
-        fontFamily: 'ui-monospace, monospace',
+        fontFamily: 'var(--font-mono)',
         fontSize: 12,
         flexShrink: 0,
         marginTop: 1,
@@ -74,7 +74,7 @@ function NotificationItem({ n, onMarkRead }: { n: AppNotification; onMarkRead: (
       </span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontFamily: 'ui-monospace, monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 11,
           color: n.read ? 'var(--text-secondary)' : 'var(--text-primary)',
           lineHeight: 1.5,
@@ -84,7 +84,7 @@ function NotificationItem({ n, onMarkRead }: { n: AppNotification; onMarkRead: (
         </div>
         <div style={{
           marginTop: 4,
-          fontFamily: 'ui-monospace, monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 9,
           color: 'var(--text-disabled)',
           textTransform: 'uppercase',
@@ -103,7 +103,7 @@ function NotificationItem({ n, onMarkRead }: { n: AppNotification; onMarkRead: (
 const actionBtnStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
-  fontFamily: 'ui-monospace, monospace',
+  fontFamily: 'var(--font-mono)',
   fontSize: 9,
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
@@ -165,8 +165,8 @@ export function NotificationBell({ notifications, open, onToggle, onClose, onMar
             minWidth: 14,
             height: 14,
             background: 'var(--accent)',
-            color: '#080808',
-            fontFamily: 'ui-monospace, monospace',
+            color: 'var(--accent-fg)',
+            fontFamily: 'var(--font-mono)',
             fontSize: 9,
             fontWeight: 700,
             display: 'flex',
@@ -193,7 +193,7 @@ export function NotificationBell({ notifications, open, onToggle, onClose, onMar
           display: 'flex',
           flexDirection: 'column',
           zIndex: 200,
-          boxShadow: '-8px 0 32px rgba(0,0,0,0.5)',
+          boxShadow: 'var(--shadow-lg)',
           animation: 'slideInRight 150ms ease-out',
         }}>
           {/* Header */}
@@ -207,19 +207,17 @@ export function NotificationBell({ notifications, open, onToggle, onClose, onMar
           }}>
             <div>
               <span style={{
-                fontFamily: 'ui-monospace, monospace',
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.12em',
-                color: 'var(--accent)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'var(--text-primary)',
               }}>
                 Notifications
               </span>
               {unreadCount > 0 && (
                 <span style={{
                   marginLeft: 8,
-                  fontFamily: 'ui-monospace, monospace',
+                  fontFamily: 'var(--font-mono)',
                   fontSize: 10,
                   color: 'var(--text-muted)',
                 }}>
@@ -263,7 +261,7 @@ export function NotificationBell({ notifications, open, onToggle, onClose, onMar
               <div style={{
                 padding: '64px 24px',
                 textAlign: 'center',
-                fontFamily: 'ui-monospace, monospace',
+                fontFamily: 'var(--font-mono)',
                 fontSize: 10,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
