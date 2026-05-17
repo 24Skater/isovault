@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { IsoDefinition, IsoVersion, IsoStatus } from '../api/definitions';
 import { fetchVersions, queueVersionDownload, importVersion } from '../api/definitions';
 import { formatBytes } from '../utils/format';
@@ -358,7 +358,7 @@ export default function VersionTimeline({ definition }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [activeForm, setActiveForm] = useState<ActiveForm>(null);
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
     setError(null);
     fetchVersions(definitionId, { page, limit: LIMIT })
@@ -370,9 +370,9 @@ export default function VersionTimeline({ definition }: Props) {
         setError(err instanceof Error ? err.message : 'Failed to load versions.');
       })
       .finally(() => setLoading(false));
-  }
+  }, [definitionId, page]);
 
-  useEffect(() => { load(); }, [definitionId, page]);
+  useEffect(() => { load(); }, [load]);
 
   if (loading) {
     return (
