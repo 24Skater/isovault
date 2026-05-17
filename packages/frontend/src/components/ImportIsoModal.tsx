@@ -116,6 +116,7 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
       onDone();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Import failed.');
+    } finally {
       setSaving(false);
     }
   }
@@ -172,9 +173,13 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* File picker */}
           <div>
-            <span style={labelStyle}>ISO File *</span>
+            <label htmlFor="import-file" style={labelStyle}>ISO File *</label>
             <div
               onClick={() => fileRef.current?.click()}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileRef.current?.click(); } }}
+              tabIndex={0}
+              role="button"
+              aria-label="Choose ISO file"
               style={{
                 padding: '12px 14px', border: '1px dashed var(--border-default)',
                 borderRadius: 'var(--radius-md)',
@@ -195,6 +200,7 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
               )}
             </div>
             <input
+              id="import-file"
               ref={fileRef}
               type="file"
               accept=".iso,.img,.bin"
