@@ -160,7 +160,7 @@ export default function AuditLog() {
       <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <tr>
               {['Severity', 'Event Type', 'Entity', 'Timestamp'].map((h) => (
                 <th key={h} style={{
                   padding: '10px 12px',
@@ -171,6 +171,7 @@ export default function AuditLog() {
                   fontSize: 11,
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
+                  borderBottom: '1px solid var(--border-default)',
                 }}>
                   {h}
                 </th>
