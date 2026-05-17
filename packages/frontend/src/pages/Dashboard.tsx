@@ -10,34 +10,34 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
     <div style={{
       background: 'var(--bg-surface)',
       border: '1px solid var(--border-default)',
-      borderTop: '2px solid var(--accent)',
+      borderRadius: 'var(--radius-lg)',
       padding: '16px 20px',
       flex: '1 1 160px',
     }}>
       <div style={{
-        fontFamily: 'ui-monospace, monospace',
-        fontSize: 10,
-        fontWeight: 600,
+        fontFamily: 'var(--font-sans)',
+        fontSize: 11,
+        fontWeight: 500,
         textTransform: 'uppercase',
-        letterSpacing: '0.10em',
+        letterSpacing: '0.06em',
         color: 'var(--text-muted)',
         marginBottom: 10,
       }}>
         {label}
       </div>
       <div style={{
-        fontFamily: 'ui-monospace, monospace',
-        fontSize: 36,
+        fontFamily: 'var(--font-mono)',
+        fontSize: 32,
         fontWeight: 700,
         color: 'var(--text-primary)',
         lineHeight: 1,
-        letterSpacing: '-0.02em',
+        letterSpacing: '-0.01em',
       }}>
         {value}
       </div>
       {sub && (
         <div style={{
-          fontFamily: 'ui-monospace, monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 11,
           color: 'var(--text-muted)',
           marginTop: 6,
@@ -59,23 +59,23 @@ function StorageBar({ stats }: { stats: DashboardStats['storage'] }) {
     <div style={{
       background: 'var(--bg-surface)',
       border: `1px solid ${overThreshold ? 'var(--color-warning)' : 'var(--border-default)'}`,
-      borderTop: `2px solid ${overThreshold ? 'var(--color-warning)' : 'var(--border-strong)'}`,
+      borderRadius: 'var(--radius-lg)',
       padding: '16px 20px',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
         <span style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 10,
-          fontWeight: 600,
+          fontFamily: 'var(--font-sans)',
+          fontSize: 11,
+          fontWeight: 500,
           textTransform: 'uppercase',
-          letterSpacing: '0.10em',
+          letterSpacing: '0.06em',
           color: 'var(--text-muted)',
         }}>
           Storage
         </span>
         <span style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
+          fontFamily: 'var(--font-mono)',
+          fontSize: 12,
           color: overThreshold ? 'var(--color-warning)' : 'var(--text-secondary)',
         }}>
           {formatBytes(stats.usedBytes)}{stats.totalBytes ? ` / ${formatBytes(stats.totalBytes)}` : ''}
@@ -83,23 +83,24 @@ function StorageBar({ stats }: { stats: DashboardStats['storage'] }) {
       </div>
 
       {pct !== null && (
-        <div style={{ height: 4, background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+        <div style={{ height: 4, background: 'var(--bg-elevated)', borderRadius: 2, overflow: 'hidden' }}>
           <div className="progress-fill" style={{
             height: '100%',
             width: `${pct}%`,
             background: overThreshold ? 'var(--color-warning)' : 'var(--accent)',
+            borderRadius: 2,
           }} />
         </div>
       )}
 
       {pct !== null && (
         <div style={{
-          fontFamily: 'ui-monospace, monospace',
+          fontFamily: 'var(--font-mono)',
           fontSize: 10,
           color: 'var(--text-muted)',
           marginTop: 8,
         }}>
-          {pct.toFixed(1)}% USED · ALERT AT {stats.alertThresholdPercent}%
+          {pct.toFixed(1)}% used · alert at {stats.alertThresholdPercent}%
         </div>
       )}
     </div>
@@ -145,14 +146,15 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div style={{ padding: '24px 32px' }}>
+      <div style={{ padding: '28px 28px' }}>
         <div style={{
           background: 'var(--color-error-subtle)',
-          border: '1px solid var(--color-error)',
-          color: 'var(--color-error)',
+          border: '1px solid var(--color-danger)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--color-danger)',
           padding: '10px 14px',
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 12,
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
         }}>
           {error}
         </div>
@@ -162,36 +164,43 @@ export default function Dashboard() {
 
   if (!stats) {
     return (
-      <div style={{ padding: '24px 32px' }}>
-        <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 12 }}>Loading…</p>
+      <div style={{ padding: '28px 28px' }}>
+        <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: 13 }}>Loading…</p>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 900 }}>
-      <h1 style={{
-        fontFamily: 'ui-monospace, monospace',
-        fontSize: 11,
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        letterSpacing: '0.12em',
-        color: 'var(--text-secondary)',
-        marginBottom: 4,
-      }}>
-        Dashboard
-      </h1>
-      <div className="page-rule" />
+    <div style={{ padding: '28px 28px', maxWidth: 960 }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 20,
+          fontWeight: 700,
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.02em',
+          marginBottom: 4,
+        }}>
+          Dashboard
+        </h1>
+        <p style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
+          color: 'var(--text-secondary)',
+        }}>
+          Overview of your ISO library and system health
+        </p>
+      </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'flex', gap: 1, marginBottom: 1 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
         <StatCard label="Definitions" value={stats.definitions} />
         <StatCard label="Active Versions" value={stats.versions.active} sub={`${stats.versions.archived} archived`} />
         <StatCard label="Active Downloads" value={stats.downloads.running} sub={`${stats.downloads.queued} queued`} />
       </div>
 
       {/* Storage */}
-      <div style={{ marginBottom: 1 }}>
+      <div style={{ marginBottom: 12 }}>
         <StorageBar stats={stats.storage} />
       </div>
 
@@ -199,27 +208,25 @@ export default function Dashboard() {
       <div style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
       }}>
         <div style={{
-          padding: '8px 16px',
-          borderBottom: '1px solid var(--border-default)',
-          background: 'var(--bg-elevated)',
+          padding: '12px 16px',
+          borderBottom: '1px solid var(--border-subtle)',
         }}>
           <span style={{
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 10,
-            fontWeight: 700,
-            color: 'var(--text-muted)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.10em',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
           }}>
             Recent Events
           </span>
         </div>
 
         {stats.recentEvents.length === 0 ? (
-          <p style={{ padding: '14px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 12, color: 'var(--text-muted)' }}>
+          <p style={{ padding: '20px 16px', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-muted)' }}>
             No recent events.
           </p>
         ) : (
@@ -228,9 +235,9 @@ export default function Dashboard() {
               display: 'flex',
               alignItems: 'center',
               gap: 12,
-              padding: '8px 16px',
+              padding: '10px 16px',
               borderBottom: '1px solid var(--border-subtle)',
-              fontFamily: 'ui-monospace, monospace',
+              fontFamily: 'var(--font-mono)',
               fontSize: 11,
             }}>
               <span style={{
@@ -242,11 +249,15 @@ export default function Dashboard() {
               }}>
                 {SEV_LABELS[e.severity] ?? 'INFO'}
               </span>
-              <span style={{ color: 'var(--text-primary)', flex: 1 }}>{e.eventType}</span>
+              <span style={{ color: 'var(--text-primary)', flex: 1, fontFamily: 'var(--font-sans)', fontSize: 12 }}>
+                {e.eventType}
+              </span>
               {e.entityType && (
-                <span style={{ color: 'var(--text-muted)' }}>{e.entityType}</span>
+                <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                  {e.entityType}
+                </span>
               )}
-              <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+              <span style={{ color: 'var(--text-disabled)', whiteSpace: 'nowrap' }}>
                 {new Date(e.createdAt).toLocaleTimeString()}
               </span>
             </div>
