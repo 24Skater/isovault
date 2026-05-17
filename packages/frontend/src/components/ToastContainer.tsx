@@ -13,18 +13,17 @@ export function ToastContainer({ toasts, onDismiss }: {
   onDismiss: (id: string) => void;
 }) {
   useEffect(() => {
-    if (toasts.length === 0) return;
-    const latest = toasts[toasts.length - 1];
-    const t = setTimeout(() => onDismiss(latest.id), DURATION_MS);
-    return () => clearTimeout(t);
+    const timers = toasts.map((toast) =>
+      setTimeout(() => onDismiss(toast.id), DURATION_MS)
+    );
+    return () => timers.forEach(clearTimeout);
   }, [toasts, onDismiss]);
 
   if (toasts.length === 0) return null;
 
-  const borderColor: Record<string, string> = {
+  const borderColor: Record<Toast['type'], string> = {
     success: 'var(--color-success)',
     error: 'var(--color-danger)',
-    warning: 'var(--color-warning)',
     info: 'var(--border-default)',
   };
 
