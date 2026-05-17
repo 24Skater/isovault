@@ -23,29 +23,33 @@ function formatEta(sec: number | null): string {
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
-const STATUS_BORDER: Record<DownloadJobStatus, string> = {
-  queued:    'var(--color-warning)',
-  running:   'var(--accent)',
-  paused:    'var(--border-strong)',
-  completed: 'var(--color-success)',
-  failed:    'var(--color-error)',
-  cancelled: 'var(--border-strong)',
-};
-
-const STATUS_COLOR: Record<DownloadJobStatus, string> = {
-  queued:    'var(--color-warning)',
-  running:   'var(--accent)',
-  paused:    'var(--text-muted)',
-  completed: 'var(--color-success)',
-  failed:    'var(--color-error)',
-  cancelled: 'var(--text-muted)',
-};
-
 function StatusBadge({ status }: { status: DownloadJobStatus }) {
+  const bg: Record<DownloadJobStatus, string> = {
+    queued:    'var(--color-warning-subtle)',
+    running:   'var(--accent-subtle)',
+    paused:    'var(--bg-elevated)',
+    completed: 'var(--color-success-subtle)',
+    failed:    'var(--color-danger-subtle)',
+    cancelled: 'var(--bg-elevated)',
+  };
+  const color: Record<DownloadJobStatus, string> = {
+    queued:    'var(--color-warning)',
+    running:   'var(--accent)',
+    paused:    'var(--text-muted)',
+    completed: 'var(--color-success)',
+    failed:    'var(--color-danger)',
+    cancelled: 'var(--text-muted)',
+  };
   return (
-    <span className="badge" style={{
-      border: `1px solid ${STATUS_BORDER[status] ?? 'var(--border-strong)'}`,
-      color: STATUS_COLOR[status] ?? 'var(--text-muted)',
+    <span style={{
+      display: 'inline-block',
+      padding: '2px 8px',
+      borderRadius: 9999,
+      fontFamily: 'var(--font-sans)',
+      fontSize: 11,
+      fontWeight: 500,
+      background: bg[status],
+      color: color[status],
     }}>
       {status}
     </span>
@@ -56,7 +60,7 @@ function StatusBadge({ status }: { status: DownloadJobStatus }) {
 
 function ProgressBar({ percent, indeterminate }: { percent: number | null; indeterminate?: boolean }) {
   return (
-    <div style={{ height: 4, background: 'var(--bg-elevated)', overflow: 'hidden', minWidth: 120 }}>
+    <div style={{ height: 4, background: 'var(--bg-elevated)', overflow: 'hidden', borderRadius: 2, minWidth: 120 }}>
       <div
         className={indeterminate ? 'animate-pulse-slow progress-fill' : 'progress-fill'}
         style={{
@@ -64,6 +68,7 @@ function ProgressBar({ percent, indeterminate }: { percent: number | null; indet
           background: 'var(--accent)',
           width: percent !== null ? `${Math.min(percent, 100)}%` : '100%',
           opacity: indeterminate ? 0.5 : 1,
+          borderRadius: 2,
         }}
       />
     </div>
@@ -93,29 +98,29 @@ function ActiveRow({ job, progress, onCancel }: {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <StatusBadge status={job.status} />
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
           {job.id.slice(0, 8)}…
         </span>
-        <span style={{ marginLeft: 'auto', fontFamily: 'ui-monospace, monospace', color: 'var(--text-secondary)', fontSize: 11 }}>
+        <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', fontSize: 11 }}>
           {formatBytes(bytes)}{total ? ` / ${formatBytes(total)}` : ''}
         </span>
-        <span style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 11 }}>
           {formatSpeed(progress?.speedBytesPerSec ?? null)}
         </span>
-        <span style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 11 }}>
           eta {formatEta(progress?.etaSeconds ?? null)}
         </span>
         <button
           onClick={() => onCancel(job.id)}
           style={{
             background: 'transparent',
-            color: 'var(--color-error)',
-            border: '1px solid var(--color-error)',
-            padding: '3px 10px',
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 10,
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
+            color: 'var(--color-danger)',
+            border: '1px solid rgba(239,68,68,0.4)',
+            borderRadius: 'var(--radius-md)',
+            padding: '4px 10px',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            fontWeight: 500,
             cursor: 'pointer',
           }}
         >
@@ -144,20 +149,20 @@ function JobRow({ job, showCancel, onCancel }: {
       flexWrap: 'wrap',
     }}>
       <StatusBadge status={job.status} />
-      <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-muted)' }}>
+      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
         {job.id.slice(0, 8)}…
       </span>
-      <span style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-secondary)', fontSize: 11 }}>
+      <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', fontSize: 11 }}>
         attempt {job.attemptCount}/{job.maxAttempts}
       </span>
       {job.bytesDownloaded > 0 && (
-        <span style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-secondary)', fontSize: 11 }}>
+        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', fontSize: 11 }}>
           {formatBytes(job.bytesDownloaded)}{job.bytesTotal ? ` / ${formatBytes(job.bytesTotal)}` : ''}
         </span>
       )}
       {job.errorMessage && (
         <span
-          style={{ color: 'var(--color-error)', fontFamily: 'ui-monospace, monospace', fontSize: 11, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          style={{ color: 'var(--color-danger)', fontFamily: 'var(--font-mono)', fontSize: 11, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           title={job.errorMessage}
         >
           {job.errorMessage}
@@ -169,13 +174,13 @@ function JobRow({ job, showCancel, onCancel }: {
           style={{
             marginLeft: 'auto',
             background: 'transparent',
-            color: 'var(--color-error)',
-            border: '1px solid var(--color-error)',
-            padding: '3px 10px',
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 10,
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
+            color: 'var(--color-danger)',
+            border: '1px solid rgba(239,68,68,0.4)',
+            borderRadius: 'var(--radius-md)',
+            padding: '4px 10px',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
+            fontWeight: 500,
             cursor: 'pointer',
           }}
         >
@@ -204,11 +209,9 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
           onClick={() => onChange(t.id)}
           style={{
             padding: '8px 16px',
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 10,
-            fontWeight: active === t.id ? 700 : 400,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 13,
+            fontWeight: active === t.id ? 500 : 400,
             color: active === t.id ? 'var(--text-primary)' : 'var(--text-muted)',
             background: 'none',
             border: 'none',
@@ -269,15 +272,14 @@ export default function Downloads() {
   const historyJobs = jobs.filter((j) => ['completed', 'failed', 'cancelled'].includes(j.status));
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 900 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+    <div style={{ padding: '28px 28px', maxWidth: 900 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <h1 style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
+          fontFamily: 'var(--font-sans)',
+          fontSize: 20,
           fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          color: 'var(--text-secondary)',
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.02em',
         }}>
           Downloads
         </h1>
@@ -288,21 +290,21 @@ export default function Downloads() {
           display: 'inline-block',
           flexShrink: 0,
         }} title={connected ? 'Live updates connected' : 'Reconnecting…'} />
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
           {connected ? 'live' : 'connecting…'}
         </span>
       </div>
-      <div className="page-rule" />
 
       {error && (
         <div style={{
-          background: 'var(--color-error-subtle)',
-          border: '1px solid var(--color-error)',
-          color: 'var(--color-error)',
+          background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger)',
+          color: 'var(--color-danger)',
           padding: '8px 12px',
           marginBottom: 16,
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
+          borderRadius: 'var(--radius-md)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -318,7 +320,7 @@ export default function Downloads() {
         {tab === 'active' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {activeJobs.length === 0 ? (
-              <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11 }}>No active downloads.</p>
+              <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: 13 }}>No active downloads.</p>
             ) : (
               activeJobs.map((job) => (
                 <ActiveRow key={job.id} job={job} progress={progressMap[job.id]} onCancel={handleCancel} />
@@ -328,9 +330,9 @@ export default function Downloads() {
         )}
 
         {tab === 'queued' && (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
             {queuedJobs.length === 0 ? (
-              <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11, padding: 16 }}>No queued downloads.</p>
+              <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: 13, padding: 16 }}>No queued downloads.</p>
             ) : (
               queuedJobs.map((job) => (
                 <JobRow key={job.id} job={job} showCancel onCancel={handleCancel} />
@@ -340,9 +342,9 @@ export default function Downloads() {
         )}
 
         {tab === 'history' && (
-          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
             {historyJobs.length === 0 ? (
-              <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11, padding: 16 }}>No download history.</p>
+              <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: 13, padding: 16 }}>No download history.</p>
             ) : (
               historyJobs.map((job) => (
                 <JobRow key={job.id} job={job} showCancel={false} onCancel={handleCancel} />

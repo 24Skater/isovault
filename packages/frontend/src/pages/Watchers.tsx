@@ -21,21 +21,37 @@ function strategyLabel(s: WatchStrategy | null): string {
 
 // ─── Strategy badge ───────────────────────────────────────────────────────────
 
-const STRATEGY_COLOR: Record<WatchStrategy, string> = {
-  rss:         'var(--color-warning)',
-  html_scrape: 'var(--accent)',
-  json_api:    'var(--color-success)',
-  checksum:    'var(--text-secondary)',
-  filename:    'var(--color-error)',
-};
-
 function StrategyBadge({ strategy }: { strategy: WatchStrategy | null }) {
   if (!strategy) {
-    return <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>none</span>;
+    return <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>none</span>;
   }
-  const color = STRATEGY_COLOR[strategy] ?? 'var(--text-muted)';
+  const bgMap: Record<WatchStrategy, string> = {
+    rss:         'var(--color-warning-subtle)',
+    html_scrape: 'var(--accent-subtle)',
+    json_api:    'var(--color-success-subtle)',
+    checksum:    'var(--bg-elevated)',
+    filename:    'var(--color-danger-subtle)',
+  };
+  const colorMap: Record<WatchStrategy, string> = {
+    rss:         'var(--color-warning)',
+    html_scrape: 'var(--accent)',
+    json_api:    'var(--color-success)',
+    checksum:    'var(--text-secondary)',
+    filename:    'var(--color-danger)',
+  };
+  const bg = bgMap[strategy] ?? 'var(--bg-elevated)';
+  const color = colorMap[strategy] ?? 'var(--text-muted)';
   return (
-    <span className="badge" style={{ border: `1px solid ${color}`, color }}>
+    <span style={{
+      display: 'inline-block',
+      padding: '2px 8px',
+      borderRadius: 9999,
+      fontFamily: 'var(--font-sans)',
+      fontSize: 11,
+      fontWeight: 500,
+      background: bg,
+      color,
+    }}>
       {strategyLabel(strategy)}
     </span>
   );
@@ -64,11 +80,11 @@ function WatcherRow({ def, isTriggering, recentDetection, onTrigger }: WatcherRo
         <span style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {def.name}
         </span>
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
           {def.family} · every {def.watchIntervalMinutes} min
         </span>
         {recentDetection && (
-          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--color-success)', marginTop: 2 }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--color-success)', marginTop: 2 }}>
             ↑ {recentDetection.versionString}
           </span>
         )}
@@ -77,15 +93,15 @@ function WatcherRow({ def, isTriggering, recentDetection, onTrigger }: WatcherRo
       <StrategyBadge strategy={def.watchStrategy} />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'right' }}>
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Checked</span>
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Checked</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)' }}>
           {formatDate(def.watchLastCheckedAt)}
         </span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2, textAlign: 'right' }}>
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Version</span>
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Version</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
           {def.watchLastVersionFound ?? '—'}
         </span>
       </div>
@@ -96,14 +112,14 @@ function WatcherRow({ def, isTriggering, recentDetection, onTrigger }: WatcherRo
         style={{
           background: 'transparent',
           color: isTriggering ? 'var(--text-muted)' : 'var(--accent)',
-          border: `1px solid ${isTriggering ? 'var(--border-strong)' : 'var(--accent)'}`,
+          border: `1px solid ${isTriggering ? 'var(--border-default)' : 'var(--accent)'}`,
+          borderRadius: 'var(--radius-md)',
           padding: '5px 12px',
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 10,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
+          fontFamily: 'var(--font-sans)',
+          fontSize: 12,
+          fontWeight: 500,
           cursor: isTriggering ? 'default' : 'pointer',
-          whiteSpace: 'nowrap',
+          whiteSpace: 'nowrap' as const,
           opacity: isTriggering ? 0.6 : 1,
         }}
       >
@@ -183,18 +199,17 @@ export default function Watchers() {
   }, [loadWatchers]);
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 1000 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+    <div style={{ padding: '28px 28px', maxWidth: 1000 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <h1 style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
+          fontFamily: 'var(--font-sans)',
+          fontSize: 20,
           fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          color: 'var(--text-secondary)',
+          color: 'var(--text-primary)',
+          letterSpacing: '-0.02em',
         }}>
           Watchers
-          <span style={{ marginLeft: 12, color: 'var(--text-muted)', fontWeight: 400 }}>
+          <span style={{ marginLeft: 10, fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 400, color: 'var(--text-muted)' }}>
             {watchers.length}
           </span>
         </h1>
@@ -205,21 +220,21 @@ export default function Watchers() {
           display: 'inline-block',
           flexShrink: 0,
         }} title={connected ? 'Live updates connected' : 'Reconnecting…'} />
-        <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)' }}>
           {connected ? 'live' : 'connecting…'}
         </span>
       </div>
-      <div className="page-rule" />
 
       {error && (
         <div style={{
-          background: 'var(--color-error-subtle)',
-          border: '1px solid var(--color-error)',
-          color: 'var(--color-error)',
+          background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger)',
+          color: 'var(--color-danger)',
           padding: '8px 12px',
           marginBottom: 16,
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
+          borderRadius: 'var(--radius-md)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -229,7 +244,7 @@ export default function Watchers() {
         </div>
       )}
 
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
         {/* Column headers */}
         <div style={{
           display: 'grid',
@@ -237,16 +252,15 @@ export default function Watchers() {
           gap: 16,
           padding: '8px 16px',
           borderBottom: '1px solid var(--border-default)',
-          background: 'var(--bg-elevated)',
         }}>
           {['Definition', 'Strategy', 'Last Checked', 'Last Version', ''].map((label) => (
             <span key={label} style={{
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: 10,
-              fontWeight: 600,
+              fontFamily: 'var(--font-sans)',
+              fontSize: 11,
+              fontWeight: 500,
               color: 'var(--text-muted)',
               textTransform: 'uppercase',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.06em',
               textAlign: label === 'Last Checked' || label === 'Last Version' ? 'right' : 'left',
             }}>
               {label}
@@ -255,9 +269,9 @@ export default function Watchers() {
         </div>
 
         {loading ? (
-          <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11, padding: 16 }}>Loading…</p>
+          <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: 13, padding: 16 }}>Loading…</p>
         ) : watchers.length === 0 ? (
-          <p style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--text-muted)', fontSize: 11, padding: 16 }}>
+          <p style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-muted)', fontSize: 13, padding: 16 }}>
             No watch-enabled definitions. Enable watching on a definition in the Catalog.
           </p>
         ) : (
