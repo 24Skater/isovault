@@ -3,6 +3,9 @@ import { fetchAuditLog, type AuditLogEntry, type AuditSeverity } from '../api/au
 
 type AuditSeverityFilter = AuditSeverity | '';
 
+const AUDIT_LIMIT = 50;
+const VALID_SEVERITIES: AuditSeverity[] = ['info', 'warn', 'error', 'critical'];
+
 // ─── Severity badge ───────────────────────────────────────────────────────────
 
 function SeverityBadge({ severity }: { severity: AuditSeverity }) {
@@ -37,7 +40,9 @@ function SeverityBadge({ severity }: { severity: AuditSeverity }) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleString();
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? '—' : d.toLocaleString();
 }
 
 const inputStyle: React.CSSProperties = {
@@ -75,16 +80,15 @@ export default function AuditLog() {
   const [filterSeverity, setFilterSeverity] = useState<AuditSeverityFilter>('');
   const [filterEventType, setFilterEventType] = useState('');
 
-  const LIMIT = 50;
-
   const load = useCallback(async (p: number, sev: string, et: string) => {
     setLoading(true);
     setError(null);
     try {
+      const validSev = VALID_SEVERITIES.includes(sev as AuditSeverity) ? (sev as AuditSeverity) : undefined;
       const res = await fetchAuditLog({
         page: p,
-        limit: LIMIT,
-        severity: (sev || undefined) as AuditSeverity | undefined,
+        limit: AUDIT_LIMIT,
+        severity: validSev,
         eventType: et || undefined,
       });
       setEntries(res.data);
@@ -100,7 +104,7 @@ export default function AuditLog() {
     void load(page, filterSeverity, filterEventType);
   }, [load, page, filterSeverity, filterEventType]);
 
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const totalPages = Math.max(1, Math.ceil(total / AUDIT_LIMIT));
 
   return (
     <div style={{ padding: '28px 28px', maxWidth: 1100 }}>

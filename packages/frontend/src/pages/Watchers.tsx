@@ -253,7 +253,7 @@ export default function Watchers() {
           padding: '8px 16px',
           borderBottom: '1px solid var(--border-default)',
         }}>
-          {['Definition', 'Strategy', 'Last Checked', 'Last Version', ''].map((label) => (
+          {['Definition', 'Strategy', 'Last Checked', 'Last Version', 'Actions'].map((label) => (
             <span key={label} style={{
               fontFamily: 'var(--font-sans)',
               fontSize: 11,

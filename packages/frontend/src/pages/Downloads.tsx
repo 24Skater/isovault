@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   fetchDownloadJobs,
   cancelDownload,
@@ -9,6 +9,18 @@ import {
 import { useDownloadProgress, type ProgressMap } from '../hooks/useDownloadProgress';
 import { formatBytes } from '../utils/format';
 
+const cancelBtnStyle: React.CSSProperties = {
+  background: 'transparent',
+  color: 'var(--color-danger)',
+  border: '1px solid rgba(239,68,68,0.4)',
+  borderRadius: 'var(--radius-md)',
+  padding: '4px 10px',
+  fontFamily: 'var(--font-sans)',
+  fontSize: 12,
+  fontWeight: 500,
+  cursor: 'pointer',
+};
+
 function formatSpeed(bps: number | null): string {
   if (bps === null || bps <= 0) return '—';
   return `${formatBytes(bps)}/s`;
@@ -17,7 +29,7 @@ function formatSpeed(bps: number | null): string {
 function formatEta(sec: number | null): string {
   if (sec === null || sec < 0) return '—';
   if (sec < 60) return `${sec}s`;
-  if (sec < 3600) return `${Math.floor(sec / 60)}m ${sec % 60}s`;
+  if (sec < 3600) return `${Math.floor(sec / 60)}m ${Math.floor(sec % 60)}s`;
   return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
 }
 
@@ -110,20 +122,7 @@ function ActiveRow({ job, progress, onCancel }: {
         <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 11 }}>
           eta {formatEta(progress?.etaSeconds ?? null)}
         </span>
-        <button
-          onClick={() => onCancel(job.id)}
-          style={{
-            background: 'transparent',
-            color: 'var(--color-danger)',
-            border: '1px solid rgba(239,68,68,0.4)',
-            borderRadius: 'var(--radius-md)',
-            padding: '4px 10px',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 12,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
-        >
+        <button onClick={() => onCancel(job.id)} style={cancelBtnStyle}>
           Cancel
         </button>
       </div>
@@ -171,18 +170,7 @@ function JobRow({ job, showCancel, onCancel }: {
       {showCancel && (
         <button
           onClick={() => onCancel(job.id)}
-          style={{
-            marginLeft: 'auto',
-            background: 'transparent',
-            color: 'var(--color-danger)',
-            border: '1px solid rgba(239,68,68,0.4)',
-            borderRadius: 'var(--radius-md)',
-            padding: '4px 10px',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 12,
-            fontWeight: 500,
-            cursor: 'pointer',
-          }}
+          style={{ ...cancelBtnStyle, marginLeft: 'auto' }}
         >
           Cancel
         </button>
