@@ -82,7 +82,21 @@
       "PowerShell(docker compose build --no-cache 2>&1 | Where-Object { $_ -match \"error|Error|npm|warn\" } | Select-Object -Last 20)",
       "PowerShell(docker compose up -d 2>&1)",
       "Skill(feature-dev)",
-      "Skill(feature-dev:*)"
+      "Skill(feature-dev:*)",
+      "Skill(frontend-design)",
+      "Skill(frontend-design:*)",
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:brainstorming:*)",
+      "Read(//c/Users/ramos/.claude/plugins/cache/superpowers-dev/superpowers/5.0.7/skills/brainstorming/**)",
+      "Bash(bash \"C:/Users/ramos/.claude/plugins/cache/superpowers-dev/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"c:/Users/ramos/GitHub/isovault\")",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\.superpowers\\\\brainstorm\\\\1721-1778987343\\\\state\\\\\" -ErrorAction SilentlyContinue | Select-Object Name; Get-Content \"c:\\\\Users\\\\ramos\\\\GitHub\\\\isovault\\\\.superpowers\\\\brainstorm\\\\1721-1778987343\\\\state\\\\events\" -ErrorAction SilentlyContinue)",
+      "PowerShell(netstat -ano)",
+      "Bash(git commit *)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:writing-plans:*)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Skill(superpowers:subagent-driven-development:*)",
+      "Bash(npx eslint *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills"

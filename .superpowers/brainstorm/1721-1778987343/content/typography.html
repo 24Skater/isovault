@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IsoVault — Typography Direction</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #09090b;
+    color: #a1a1aa;
+    font-family: system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 40px 32px 80px;
+  }
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fafafa;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #52525b;
+    margin-bottom: 40px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 20px;
+    max-width: 1120px;
+  }
+  .card {
+    background: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 180ms, box-shadow 180ms;
+  }
+  .card:hover { border-color: #6366f1; }
+  .card.selected {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.25);
+  }
+  .card-image {
+    padding: 20px;
+    background: #0d0d10;
+    border-bottom: 1px solid #27272a;
+  }
+  .card-body {
+    padding: 18px 20px;
+  }
+  .card-body h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fafafa;
+    margin-bottom: 6px;
+  }
+  .card-body p {
+    font-size: 12px;
+    color: #71717a;
+    line-height: 1.6;
+  }
+  .badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 8px;
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 4px;
+    font-size: 10px;
+    color: #818cf8;
+    font-weight: 500;
+  }
+
+  /* Option A - Full Monospace */
+  .opt-a {
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    background: #09090b;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .opt-a .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #1a1a1f;
+  }
+  .opt-a .row:last-child { border-bottom: none; }
+  .opt-a .label { font-size: 10px; color: #52525b; width: 80px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.06em; }
+  .opt-a .sample-h1 { font-size: 20px; font-weight: 700; color: #fafafa; }
+  .opt-a .sample-h2 { font-size: 14px; font-weight: 600; color: #e4e4e7; }
+  .opt-a .sample-body { font-size: 12px; color: #a1a1aa; line-height: 1.5; }
+  .opt-a .sample-label { font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 0.08em; }
+  .opt-a .sample-val { font-size: 13px; font-weight: 600; color: #6366f1; }
+
+  /* Option B - Inter / Monospace hybrid */
+  .opt-b {
+    background: #09090b;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .opt-b .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #1a1a1f;
+  }
+  .opt-b .row:last-child { border-bottom: none; }
+  .opt-b .label { font-size: 10px; color: #52525b; width: 80px; flex-shrink: 0; font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+  .opt-b .sample-h1 { font-size: 20px; font-weight: 700; color: #fafafa; font-family: Inter, system-ui, sans-serif; letter-spacing: -0.02em; }
+  .opt-b .sample-h2 { font-size: 14px; font-weight: 600; color: #e4e4e7; font-family: Inter, system-ui, sans-serif; letter-spacing: -0.01em; }
+  .opt-b .sample-body { font-size: 12px; color: #a1a1aa; line-height: 1.6; font-family: Inter, system-ui, sans-serif; }
+  .opt-b .sample-label { font-size: 10px; color: #71717a; font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+  .opt-b .sample-val { font-size: 13px; font-weight: 700; color: #6366f1; font-family: ui-monospace, monospace; }
+
+  /* Option C - Geist / display */
+  .opt-c {
+    background: #09090b;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .opt-c .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #1a1a1f;
+  }
+  .opt-c .row:last-child { border-bottom: none; }
+  .opt-c .label { font-size: 10px; color: #52525b; width: 80px; flex-shrink: 0; font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+  .opt-c .sample-h1 { font-size: 20px; font-weight: 800; color: #fafafa; font-family: Inter, system-ui, sans-serif; letter-spacing: -0.03em; }
+  .opt-c .sample-h2 { font-size: 14px; font-weight: 700; color: #e4e4e7; font-family: Inter, system-ui, sans-serif; letter-spacing: -0.02em; }
+  .opt-c .sample-body { font-size: 12px; color: #a1a1aa; line-height: 1.6; font-family: Inter, system-ui, sans-serif; }
+  .opt-c .sample-label { font-size: 9px; color: #71717a; font-family: ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.12em; }
+  .opt-c .sample-val { font-size: 14px; font-weight: 800; color: #6366f1; font-family: Inter, system-ui, sans-serif; letter-spacing: -0.02em; }
+
+  function toggleSelect(el) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+</style>
+</head>
+<body>
+
+<h2>Typography Direction</h2>
+<p class="subtitle">This affects every label, heading, body, and value on screen. Pick the feel that fits.</p>
+
+<div class="cards">
+
+  <!-- Option A: Full Mono -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="opt-a">
+        <div class="row"><span class="label">H1</span><span class="sample-h1">Ubuntu 24.04 LTS</span></div>
+        <div class="row"><span class="label">H2</span><span class="sample-h2">Version Timeline</span></div>
+        <div class="row"><span class="label">Body</span><span class="sample-body">24 definitions tracked across 3 architectures</span></div>
+        <div class="row"><span class="label">Caption</span><span class="sample-label">Last synced · 4 min ago</span></div>
+        <div class="row"><span class="label">Value</span><span class="sample-val">62.4 GB</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Full Monospace</h3>
+      <p>Every character in the same fixed-width face. Very consistent. Technical and terminal-adjacent — great for a tool used by people who live in the CLI.</p>
+      <p style="margin-top:6px;font-size:12px;opacity:0.7;">Current IsoVault style. Seen in: btop, k9s, Warp terminal UI</p>
+      <span class="badge">CLI-native feel</span>
+    </div>
+  </div>
+
+  <!-- Option B: Inter + Mono hybrid -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="opt-b">
+        <div class="row"><span class="label">H1</span><span class="sample-h1">Ubuntu 24.04 LTS</span></div>
+        <div class="row"><span class="label">H2</span><span class="sample-h2">Version Timeline</span></div>
+        <div class="row"><span class="label">Body</span><span class="sample-body">24 definitions tracked across 3 architectures</span></div>
+        <div class="row"><span class="label">Caption</span><span class="sample-label">Last synced · 4 min ago</span></div>
+        <div class="row"><span class="label">Value</span><span class="sample-val">62.4 GB</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Inter + Mono Hybrid <span style="color:#6366f1">★ Recommended</span></h3>
+      <p>Inter for headings and body text (easier to read at scale), monospace reserved for labels, values, hashes, sizes. Best of both worlds — approachable but precise.</p>
+      <p style="margin-top:6px;font-size:12px;opacity:0.7;">Seen in: Linear, Supabase, Vercel, Grafana</p>
+      <span class="badge">Modern SaaS default</span>
+    </div>
+  </div>
+
+  <!-- Option C: Tight Inter (Vercel-style) -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="opt-c">
+        <div class="row"><span class="label">H1</span><span class="sample-h1">Ubuntu 24.04 LTS</span></div>
+        <div class="row"><span class="label">H2</span><span class="sample-h2">Version Timeline</span></div>
+        <div class="row"><span class="label">Body</span><span class="sample-body">24 definitions tracked across 3 architectures</span></div>
+        <div class="row"><span class="label">Caption</span><span class="sample-label">Last synced · 4 min ago</span></div>
+        <div class="row"><span class="label">Value</span><span class="sample-val">62.4 GB</span></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Tight Inter (Display-weight)</h3>
+      <p>Inter everywhere but cranked tight — negative letter-spacing, heavier weights (700–800), high-contrast hierarchy. Values displayed large and bold in Inter rather than monospace.</p>
+      <p style="margin-top:6px;font-size:12px;opacity:0.7;">Seen in: Vercel, Resend, Liveblocks</p>
+      <span class="badge">Bold & editorial</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleSelect(el) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>
