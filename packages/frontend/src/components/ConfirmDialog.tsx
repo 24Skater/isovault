@@ -14,57 +14,73 @@ export default function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 50,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.7)',
-    }}>
+    <div
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '64px 16px',
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(2px)',
+      }}
+      onClick={e => { if (e.target === e.currentTarget) onCancel(); }}
+    >
       <div style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-xl)',
         padding: '24px',
         width: '100%',
         maxWidth: 360,
+        animation: 'slideInUp 180ms ease-out',
       }}>
         <div style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 10,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.10em',
-          color: 'var(--color-error)',
+          fontFamily: 'var(--font-sans)',
+          fontSize: 15,
+          fontWeight: 600,
+          color: 'var(--text-primary)',
           marginBottom: 12,
         }}>
           {title}
         </div>
-        <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
+        <div style={{
+          fontFamily: 'var(--font-sans)',
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: 'var(--text-secondary)',
+          marginBottom: 20,
+        }}>
           {message}
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button
+            type="button"
             onClick={onCancel}
             style={{
-              padding: '6px 14px',
+              padding: '7px 16px',
               background: 'transparent',
               color: 'var(--text-secondary)',
               border: '1px solid var(--border-default)',
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: 11,
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              fontWeight: 500,
               cursor: 'pointer',
             }}
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             style={{
-              padding: '6px 14px',
-              background: 'var(--color-error)',
+              padding: '7px 16px',
+              background: 'var(--color-danger)',
               color: '#fff',
               border: 'none',
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: 11,
-              fontWeight: 700,
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              fontWeight: 600,
               cursor: 'pointer',
             }}
           >

@@ -121,14 +121,15 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
   }
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', boxSizing: 'border-box', padding: '7px 10px',
+    width: '100%', boxSizing: 'border-box', height: 34, padding: '0 10px',
     background: 'var(--bg-input)', border: '1px solid var(--border-default)',
-    color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: 12, outline: 'none',
+    borderRadius: 'var(--radius-sm)',
+    color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', fontSize: 13, outline: 'none',
   };
 
   const labelStyle: React.CSSProperties = {
-    display: 'block', fontFamily: 'ui-monospace, monospace', fontSize: 10,
-    fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em',
+    display: 'block', fontFamily: 'var(--font-sans)', fontSize: 11,
+    fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em',
     color: 'var(--text-muted)', marginBottom: 5,
   };
 
@@ -138,7 +139,8 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
         position: 'fixed', inset: 0, zIndex: 50,
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
         overflowY: 'auto', padding: '64px 16px',
-        background: 'rgba(0,0,0,0.7)',
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(2px)',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -146,20 +148,23 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
         onSubmit={(e) => void handleSubmit(e)}
         style={{
           width: '100%', maxWidth: 520,
-          background: 'var(--bg-surface)', border: '1px solid var(--border-default)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 'var(--radius-xl)',
           padding: '24px',
+          animation: 'slideInUp 180ms ease-out',
         }}
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--accent)' }}>
-            ↑ Import ISO
+          <div style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+            Import ISO
           </div>
-          <button type="button" onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer' }}>✕</button>
+          <button type="button" onClick={onClose} aria-label="Close" style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}>✕</button>
         </div>
 
         {error && (
-          <div style={{ marginBottom: 16, padding: '8px 12px', background: 'var(--color-error-subtle)', border: '1px solid var(--color-error)', color: 'var(--color-error)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
+          <div style={{ marginBottom: 16, padding: '8px 12px', background: 'var(--color-danger-subtle)', border: '1px solid var(--color-danger)', borderRadius: 'var(--radius-md)', color: 'var(--color-danger)', fontFamily: 'var(--font-sans)', fontSize: 12 }}>
             {error}
           </div>
         )}
@@ -172,18 +177,19 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
               onClick={() => fileRef.current?.click()}
               style={{
                 padding: '12px 14px', border: '1px dashed var(--border-default)',
+                borderRadius: 'var(--radius-md)',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
                 background: 'var(--bg-input)',
               }}
             >
-              <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 500, color: 'var(--accent)', flexShrink: 0 }}>
                 Choose file
               </span>
-              <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: file ? 'var(--text-primary)' : 'var(--text-disabled)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: file ? 'var(--text-primary)' : 'var(--text-disabled)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {file ? file.name : 'No file selected'}
               </span>
               {file && (
-                <span style={{ marginLeft: 'auto', fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>
+                <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
                   {(file.size / 1024 / 1024).toFixed(0)} MB
                 </span>
               )}
@@ -196,46 +202,46 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
               onChange={e => { const f = e.target.files?.[0]; if (f) handleFileChange(f); }}
             />
             {file && (
-              <div style={{ marginTop: 6, fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--color-success)' }}>
+              <div style={{ marginTop: 6, fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--color-success)' }}>
                 ✓ Filename parsed — review fields below
               </div>
             )}
           </div>
 
           {/* Name */}
-          <label style={{ display: 'block' }}>
-            <span style={labelStyle}>Name *</span>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Ubuntu 24.04 LTS" style={inputStyle} required />
-          </label>
+          <div>
+            <label htmlFor="import-name" style={labelStyle}>Name *</label>
+            <input id="import-name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Ubuntu 24.04 LTS" style={inputStyle} required />
+          </div>
 
           {/* Family + Architecture */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <label style={{ display: 'block' }}>
-              <span style={labelStyle}>Family *</span>
-              <input value={family} onChange={e => setFamily(e.target.value)} placeholder="ubuntu" style={inputStyle} required />
-            </label>
-            <label style={{ display: 'block' }}>
-              <span style={labelStyle}>Architecture</span>
-              <select value={architecture} onChange={e => setArchitecture(e.target.value)} style={inputStyle}>
+            <div>
+              <label htmlFor="import-family" style={labelStyle}>Family *</label>
+              <input id="import-family" value={family} onChange={e => setFamily(e.target.value)} placeholder="ubuntu" style={inputStyle} required />
+            </div>
+            <div>
+              <label htmlFor="import-arch" style={labelStyle}>Architecture</label>
+              <select id="import-arch" value={architecture} onChange={e => setArchitecture(e.target.value)} style={inputStyle}>
                 <option>x86_64</option>
                 <option>aarch64</option>
                 <option>arm</option>
                 <option>riscv64</option>
               </select>
-            </label>
+            </div>
           </div>
 
           {/* Version string */}
-          <label style={{ display: 'block' }}>
-            <span style={labelStyle}>Version String *</span>
-            <input value={versionString} onChange={e => setVersionString(e.target.value)} placeholder="e.g. 24.04.2" style={inputStyle} required />
-          </label>
+          <div>
+            <label htmlFor="import-version" style={labelStyle}>Version String *</label>
+            <input id="import-version" value={versionString} onChange={e => setVersionString(e.target.value)} placeholder="e.g. 24.04.2" style={inputStyle} required />
+          </div>
 
           {/* Source URL */}
-          <label style={{ display: 'block' }}>
-            <span style={labelStyle}>Source URL <span style={{ fontWeight: 400, opacity: 0.7 }}>optional</span></span>
-            <input type="url" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://releases.ubuntu.com/…" style={inputStyle} />
-          </label>
+          <div>
+            <label htmlFor="import-source-url" style={labelStyle}>Source URL <span style={{ fontWeight: 400, opacity: 0.7 }}>optional</span></label>
+            <input id="import-source-url" type="url" value={sourceUrl} onChange={e => setSourceUrl(e.target.value)} placeholder="https://releases.ubuntu.com/…" style={inputStyle} />
+          </div>
 
           {/* Also queue newer from source */}
           {sourceUrl && (
@@ -247,14 +253,14 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
                   onChange={e => setAlsoQueue(e.target.checked)}
                   style={{ marginTop: 2, accentColor: 'var(--accent)', flexShrink: 0 }}
                 />
-                <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   Also queue download of newer version from source URL
                 </span>
               </label>
               {alsoQueue && (
                 <div style={{ marginTop: 8, paddingLeft: 20 }}>
-                  <span style={labelStyle}>Newer version string *</span>
-                  <input value={sourceVersion} onChange={e => setSourceVersion(e.target.value)} placeholder="e.g. 24.10" style={inputStyle} />
+                  <label htmlFor="import-source-version" style={labelStyle}>Newer version string *</label>
+                  <input id="import-source-version" value={sourceVersion} onChange={e => setSourceVersion(e.target.value)} placeholder="e.g. 24.10" style={inputStyle} />
                 </div>
               )}
             </div>
@@ -263,10 +269,19 @@ export function ImportIsoModal({ onClose, onDone }: Props) {
 
         {/* Footer */}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
-          <button type="button" onClick={onClose} style={{ padding: '7px 16px', background: 'transparent', color: 'var(--text-secondary)', border: '1px solid var(--border-default)', fontSize: 12, cursor: 'pointer' }}>
+          <button type="button" onClick={onClose} style={{
+            padding: '7px 16px', background: 'transparent', color: 'var(--text-secondary)',
+            border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)',
+            fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+          }}>
             Cancel
           </button>
-          <button type="submit" disabled={saving} style={{ padding: '7px 16px', background: 'var(--accent)', color: '#080808', border: 'none', fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+          <button type="submit" disabled={saving} style={{
+            padding: '7px 16px', background: 'var(--accent)', color: 'var(--accent-fg)',
+            border: 'none', borderRadius: 'var(--radius-md)',
+            fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600,
+            cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1,
+          }}>
             {saving ? 'Importing…' : 'Import ISO'}
           </button>
         </div>
