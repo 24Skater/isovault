@@ -20,12 +20,15 @@ import { ImportIsoModal } from '../components/ImportIsoModal';
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  padding: '7px 10px',
+  boxSizing: 'border-box',
+  height: 34,
+  padding: '0 10px',
   background: 'var(--bg-input)',
   border: '1px solid var(--border-default)',
+  borderRadius: 'var(--radius-sm)',
   color: 'var(--text-primary)',
-  fontFamily: 'inherit',
-  fontSize: 12,
+  fontFamily: 'var(--font-sans)',
+  fontSize: 13,
   outline: 'none',
 };
 
@@ -33,11 +36,17 @@ const inputStyle: React.CSSProperties = {
 
 function WatchBadge({ enabled }: { enabled: boolean }) {
   return (
-    <span className="badge" style={
-      enabled
-        ? { border: '1px solid var(--color-success)', color: 'var(--color-success)' }
-        : { border: '1px solid var(--border-strong)', color: 'var(--text-muted)' }
-    }>
+    <span style={{
+      display: 'inline-block',
+      padding: '2px 8px',
+      borderRadius: 9999,
+      fontFamily: 'var(--font-sans)',
+      fontSize: 11,
+      fontWeight: 500,
+      background: enabled ? 'var(--color-success-subtle)' : 'var(--bg-elevated)',
+      color: enabled ? 'var(--color-success)' : 'var(--text-muted)',
+      border: `1px solid ${enabled ? 'rgba(34,197,94,0.25)' : 'var(--border-default)'}`,
+    }}>
       {enabled ? 'Watching' : 'Manual'}
     </span>
   );
@@ -54,16 +63,16 @@ function Field({ label, hint, children }: {
     <label style={{ display: 'block' }}>
       <span style={{
         display: 'block',
-        fontFamily: 'ui-monospace, monospace',
-        fontSize: 10,
-        fontWeight: 600,
+        fontFamily: 'var(--font-sans)',
+        fontSize: 11,
+        fontWeight: 500,
         textTransform: 'uppercase',
-        letterSpacing: '0.08em',
+        letterSpacing: '0.06em',
         color: 'var(--text-muted)',
         marginBottom: 5,
       }}>
         {label}
-        {hint && <span style={{ marginLeft: 6, fontWeight: 400, opacity: 0.7 }}>{hint}</span>}
+        {hint && <span style={{ marginLeft: 6, fontWeight: 400, opacity: 0.7, textTransform: 'none', letterSpacing: 0 }}>{hint}</span>}
       </span>
       {children}
     </label>
@@ -176,7 +185,8 @@ function DefinitionModal({ editing, onSave, onClose }: {
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
         overflowY: 'auto',
         padding: '64px 16px',
-        background: 'rgba(0,0,0,0.7)',
+        background: 'rgba(0,0,0,0.75)',
+        backdropFilter: 'blur(2px)',
       }}
       onClick={handleBackdropClick}
     >
@@ -187,7 +197,9 @@ function DefinitionModal({ editing, onSave, onClose }: {
           maxWidth: 520,
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-default)',
+          borderRadius: 'var(--radius-xl)',
           padding: '24px',
+          animation: 'slideInUp 180ms ease-out',
         }}
       >
         <div style={{
@@ -197,12 +209,10 @@ function DefinitionModal({ editing, onSave, onClose }: {
           marginBottom: 20,
         }}>
           <div style={{
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 10,
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            color: 'var(--accent)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 15,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
           }}>
             {editing ? 'Edit Definition' : 'Add Definition'}
           </div>
@@ -227,10 +237,11 @@ function DefinitionModal({ editing, onSave, onClose }: {
             marginBottom: 16,
             padding: '8px 12px',
             background: 'var(--color-error-subtle)',
-            border: '1px solid var(--color-error)',
-            color: 'var(--color-error)',
-            fontFamily: 'ui-monospace, monospace',
-            fontSize: 11,
+            border: '1px solid var(--color-danger)',
+            borderRadius: 'var(--radius-md)',
+            color: 'var(--color-danger)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 12,
           }}>
             {error}
           </div>
@@ -368,15 +379,13 @@ function DefinitionModal({ editing, onSave, onClose }: {
                 left: form.watchEnabled ? 14 : 2,
                 width: 12,
                 height: 12,
-                background: form.watchEnabled ? '#080808' : 'var(--text-muted)',
+                background: form.watchEnabled ? 'var(--accent-fg)' : 'var(--text-muted)',
                 transition: 'left 120ms',
               }} />
             </div>
             <span style={{
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: 11,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 12,
               color: 'var(--text-secondary)',
             }}>
               Enable auto-watch
@@ -400,7 +409,9 @@ function DefinitionModal({ editing, onSave, onClose }: {
               background: 'transparent',
               color: 'var(--text-secondary)',
               border: '1px solid var(--border-default)',
-              fontSize: 12,
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
               cursor: 'pointer',
             }}
           >
@@ -412,11 +423,12 @@ function DefinitionModal({ editing, onSave, onClose }: {
             style={{
               padding: '7px 16px',
               background: 'var(--accent)',
-              color: '#080808',
+              color: 'var(--accent-fg)',
               border: 'none',
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: '0.04em',
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              fontWeight: 600,
               cursor: saving ? 'not-allowed' : 'pointer',
               opacity: saving ? 0.7 : 1,
             }}
@@ -440,14 +452,14 @@ type ModalMode =
 const LIMIT = 20;
 
 const btnStyle: React.CSSProperties = {
-  padding: '4px 10px',
+  padding: '5px 12px',
   background: 'transparent',
   color: 'var(--text-secondary)',
   border: '1px solid var(--border-default)',
-  fontFamily: 'ui-monospace, monospace',
-  fontSize: 10,
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
+  borderRadius: 'var(--radius-md)',
+  fontFamily: 'var(--font-sans)',
+  fontSize: 12,
+  fontWeight: 500,
   cursor: 'pointer',
 };
 
@@ -508,35 +520,42 @@ export default function Catalog({ onNotify }: CatalogProps) {
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 1100 }}>
+    <div style={{ padding: '28px 28px', maxWidth: 1100 }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
-        <h1 style={{
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          color: 'var(--text-secondary)',
-        }}>
-          ISO Catalog
-          <span style={{ marginLeft: 12, color: 'var(--text-muted)', fontWeight: 400 }}>
-            {total}
-          </span>
-        </h1>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div>
+          <h1 style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 20,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.02em',
+            marginBottom: 4,
+          }}>
+            ISO Catalog
+            <span style={{
+              marginLeft: 10,
+              fontFamily: 'var(--font-mono)',
+              fontSize: 13,
+              fontWeight: 400,
+              color: 'var(--text-muted)',
+            }}>
+              {total}
+            </span>
+          </h1>
+        </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             onClick={() => setShowImport(true)}
             style={{
-              padding: '6px 14px',
+              padding: '7px 14px',
               background: 'transparent',
               color: 'var(--accent)',
               border: '1px solid var(--accent)',
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: 10,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              fontWeight: 500,
               cursor: 'pointer',
             }}
           >
@@ -545,15 +564,14 @@ export default function Catalog({ onNotify }: CatalogProps) {
           <button
             onClick={() => setModal({ type: 'add' })}
             style={{
-              padding: '6px 14px',
+              padding: '7px 14px',
               background: 'var(--accent)',
-              color: '#080808',
+              color: 'var(--accent-fg)',
               border: 'none',
-              fontFamily: 'ui-monospace, monospace',
-              fontSize: 10,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
+              borderRadius: 'var(--radius-md)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              fontWeight: 600,
               cursor: 'pointer',
             }}
           >
@@ -561,15 +579,14 @@ export default function Catalog({ onNotify }: CatalogProps) {
           </button>
         </div>
       </div>
-      <div className="page-rule" />
 
-      {/* Search */}
-      <div style={{ marginBottom: 16 }}>
+      {/* Filter bar */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, alignItems: 'center' }}>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name or family…"
-          style={{ ...inputStyle, maxWidth: 320 }}
+          style={{ ...inputStyle, flex: 1, maxWidth: 320 }}
         />
       </div>
 
@@ -579,29 +596,30 @@ export default function Catalog({ onNotify }: CatalogProps) {
           marginBottom: 16,
           padding: '8px 12px',
           background: 'var(--color-error-subtle)',
-          border: '1px solid var(--color-error)',
-          color: 'var(--color-error)',
-          fontFamily: 'ui-monospace, monospace',
-          fontSize: 11,
+          border: '1px solid var(--color-danger)',
+          borderRadius: 'var(--radius-md)',
+          color: 'var(--color-danger)',
+          fontFamily: 'var(--font-sans)',
+          fontSize: 12,
         }}>
           {error}
         </div>
       )}
 
       {/* Table */}
-      <div style={{ border: '1px solid var(--border-default)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+      <div style={{ overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
-            <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
+            <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
               {['Name', 'Family', 'Architecture', 'Watch', 'Retention', ''].map((h) => (
                 <th key={h} style={{
                   textAlign: 'left',
-                  padding: '8px 16px',
-                  fontFamily: 'ui-monospace, monospace',
-                  fontSize: 10,
-                  fontWeight: 600,
+                  padding: '10px 16px',
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 11,
+                  fontWeight: 500,
                   textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
+                  letterSpacing: '0.06em',
                   color: 'var(--text-muted)',
                 }}>
                   {h}
@@ -612,48 +630,54 @@ export default function Catalog({ onNotify }: CatalogProps) {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
+                <td colSpan={6} style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-sans)', fontSize: 13 }}>
                   Loading…
                 </td>
               </tr>
             ) : definitions.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'ui-monospace, monospace', fontSize: 11 }}>
+                <td colSpan={6} style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-sans)', fontSize: 13 }}>
                   {debouncedSearch ? 'No definitions match that search.' : 'No definitions yet. Add one to get started.'}
                 </td>
               </tr>
             ) : (
-              definitions.map((def, i) => (
+              definitions.map((def) => (
                 <tr key={def.id} style={{
-                  borderTop: i > 0 ? '1px solid var(--border-subtle)' : undefined,
-                  background: 'var(--bg-base)',
-                }}>
-                  <td style={{ padding: '10px 16px' }}>
-                    <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{def.name}</div>
+                  borderBottom: '1px solid var(--border-subtle)',
+                  background: 'transparent',
+                  transition: 'background 80ms',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
+                  <td style={{ padding: '12px 16px' }}>
+                    <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 500, color: 'var(--text-primary)', fontSize: 13 }}>
+                      {def.name}
+                    </div>
                     {def.description && (
-                      <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: 11, marginTop: 2, color: 'var(--text-muted)', fontFamily: 'var(--font-sans)', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {def.description}
                       </div>
                     )}
                   </td>
-                  <td style={{ padding: '10px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-secondary)' }}>
                     {def.family}
                   </td>
-                  <td style={{ padding: '10px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-secondary)' }}>
                     {def.architecture}
                   </td>
-                  <td style={{ padding: '10px 16px' }}>
+                  <td style={{ padding: '12px 16px' }}>
                     <WatchBadge enabled={def.watchEnabled} />
                   </td>
-                  <td style={{ padding: '10px 16px', fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+                  <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>
                     keep {def.retentionCount} · {def.retentionBehavior}
                   </td>
-                  <td style={{ padding: '10px 16px' }}>
+                  <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                       <button style={btnStyle} onClick={() => setModal({ type: 'versions', def })}>Versions</button>
                       <button style={btnStyle} onClick={() => setModal({ type: 'edit', def })}>Edit</button>
                       <button
-                        style={{ ...btnStyle, color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
+                        style={{ ...btnStyle, color: 'var(--color-danger)', borderColor: 'rgba(239,68,68,0.4)' }}
                         onClick={() => setConfirmDelete(def)}
                       >
                         Delete
@@ -670,7 +694,7 @@ export default function Catalog({ onNotify }: CatalogProps) {
       {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-          <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10, color: 'var(--text-muted)' }}>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--text-muted)' }}>
             Page {page} of {totalPages}
           </span>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -700,7 +724,8 @@ export default function Catalog({ onNotify }: CatalogProps) {
             position: 'fixed', inset: 0, zIndex: 50,
             display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
             overflowY: 'auto', padding: '64px 16px',
-            background: 'rgba(0,0,0,0.7)',
+            background: 'rgba(0,0,0,0.75)',
+            backdropFilter: 'blur(2px)',
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}
         >
@@ -709,16 +734,16 @@ export default function Catalog({ onNotify }: CatalogProps) {
             maxWidth: 680,
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-default)',
+            borderRadius: 'var(--radius-xl)',
             padding: '24px',
+            animation: 'slideInUp 180ms ease-out',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{
-                fontFamily: 'ui-monospace, monospace',
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.12em',
-                color: 'var(--accent)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 15,
+                fontWeight: 600,
+                color: 'var(--text-primary)',
               }}>
                 {modal.def.name} — Versions
               </div>
