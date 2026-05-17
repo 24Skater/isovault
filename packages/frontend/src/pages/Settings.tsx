@@ -255,7 +255,7 @@ export default function Settings() {
     setLoading(true);
     try {
       const res = await fetchSettings();
-      setSettings(res.data);
+      setSettings(res.data ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load settings');
     } finally {
