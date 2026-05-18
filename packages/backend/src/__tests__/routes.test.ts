@@ -344,10 +344,19 @@ describe('GET /api/audit', () => {
     expect(res.statusCode).toBe(200);
   });
 
-  it('rejects an invalid severity value', async () => {
+  it('accepts critical severity filter', async () => {
     const res = await server.inject({
       method: 'GET',
       url: '/api/audit?severity=critical',
+      headers: auth,
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  it('rejects an invalid severity value', async () => {
+    const res = await server.inject({
+      method: 'GET',
+      url: '/api/audit?severity=bogus',
       headers: auth,
     });
     expect(res.statusCode).toBe(400);
