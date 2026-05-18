@@ -13,10 +13,18 @@ test.describe('Settings', () => {
   test('shows all setting labels', async ({ page }) => {
     const settings = new SettingsPage(page);
     await settings.goto();
+
+    // General section (default)
     await expect(page.getByText('Max Concurrent Downloads', { exact: true })).toBeVisible();
     await expect(page.getByText('Default Retention Count', { exact: true })).toBeVisible();
     await expect(page.getByText('Default Retention Behavior', { exact: true })).toBeVisible();
+
+    // Storage section
+    await settings.selectSection('Storage');
     await expect(page.getByText('Storage Alert Threshold (%)', { exact: true })).toBeVisible();
+
+    // Advanced section
+    await settings.selectSection('Advanced');
     await expect(page.getByText('Log Retention Days', { exact: true })).toBeVisible();
   });
 });

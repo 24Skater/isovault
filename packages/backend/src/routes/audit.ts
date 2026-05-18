@@ -12,7 +12,7 @@ export async function auditRoutes(fastify: FastifyInstance): Promise<void> {
         properties: {
           entityType: { type: 'string', maxLength: 100 },
           entityId: { type: 'string', maxLength: 36 },
-          severity: { type: 'string', enum: ['debug', 'info', 'warn', 'error'] },
+          severity: { type: 'string', enum: ['debug', 'info', 'warn', 'error', 'critical'] },
           eventType: { type: 'string', maxLength: 200 },
           page: { type: 'string', pattern: '^[1-9][0-9]*$' },
           limit: { type: 'string', pattern: '^[1-9][0-9]*$' },

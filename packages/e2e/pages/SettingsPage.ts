@@ -15,8 +15,12 @@ export class SettingsPage extends BasePage {
   }
 
   private rowByLabel(label: string): Locator {
-    // Label text div → left column div → flex row div → outer row div (3 levels up)
-    return this.page.getByText(label, { exact: true }).locator('../../..');
+    // <label> element is a direct child of the SettingRow root div
+    return this.page.getByText(label, { exact: true }).locator('..');
+  }
+
+  async selectSection(section: string): Promise<void> {
+    await this.page.getByRole('button', { name: section, exact: true }).click();
   }
 
   saveButton(label: string): Locator {
