@@ -320,6 +320,45 @@ function AppShell() {
               ))}
             </div>
           ))}
+
+          {/* API docs — external link */}
+          <div style={{ marginTop: 4 }}>
+            <div style={{
+              padding: '8px 16px 4px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 9,
+              fontWeight: 400,
+              textTransform: 'uppercase' as const,
+              letterSpacing: '0.10em',
+              color: '#52525b',
+            }}>
+              Resources
+            </div>
+            <a
+              href="/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 12px',
+                height: 34,
+                borderLeft: '3px solid transparent',
+                color: '#71717a',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 13,
+                fontWeight: 400,
+                textDecoration: 'none',
+                transition: 'color 80ms',
+                gap: 8,
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-secondary)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#71717a'; }}
+            >
+              API Reference
+              <span style={{ marginLeft: 'auto', fontSize: 10, opacity: 0.45, lineHeight: 1 }}>↗</span>
+            </a>
+          </div>
         </nav>
 
         {/* Active download progress */}
