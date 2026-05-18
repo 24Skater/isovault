@@ -115,7 +115,16 @@
       "Bash(pkill -f \"vite\")",
       "Bash(ISO_MANAGER_API_KEY=screenshot-test-key-2026 npm run dev -w packages/backend)",
       "Read(//tmp/**)",
-      "Bash(npm run dev -w packages/frontend > /tmp/frontend-dev.log 2>&1 & *)"
+      "Bash(npm run dev -w packages/frontend > /tmp/frontend-dev.log 2>&1 & *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://api.github.com/repos/24Skater/isovault)",
+      "Bash(curl -s https://api.github.com/repos/24Skater/isovault)",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const r=JSON.parse\\(d\\); console.log\\('name:', r.name, '\\\\nprivate:', r.private, '\\\\nlicense:', r.license?.spdx_id, '\\\\ndefault_branch:', r.default_branch, '\\\\nstars:', r.stargazers_count\\)\")",
+      "Bash(python3 -c \"import sys,json; r=json.load\\(sys.stdin\\); print\\('private:', r['private'], '\\\\nlicense:', r.get\\('license'\\) and r['license'].get\\('spdx_id'\\), '\\\\nbranch:', r['default_branch'], '\\\\nstars:', r['stargazers_count']\\)\")",
+      "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs?per_page=3\")",
+      "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs?per_page=5\")",
+      "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs?per_page=10\")",
+      "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs/26009053716/jobs\")",
+      "Bash(curl -s -L \"https://api.github.com/repos/24Skater/isovault/actions/jobs/76445986924/logs\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills",

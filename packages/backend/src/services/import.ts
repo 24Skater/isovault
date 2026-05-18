@@ -199,8 +199,5 @@ export async function importByUpload(dto: ImportByUploadDto): Promise<IsoVersion
 
 function sanitizeFilename(raw: string): string {
   // Strip directory separators and null bytes; keep only the basename
-  return path
-    .basename(raw)
-    .replace(/[\x00]/g, '')
-    .trim();
+  return path.basename(raw).split('\0').join('').trim();
 }
