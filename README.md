@@ -410,4 +410,4 @@ npm test
 
 ## License
 
-[MIT](./LICENSE) © 2024 Emerson Ramos
+[MIT](./LICENSE) © 2026 IsoVault Contributors
