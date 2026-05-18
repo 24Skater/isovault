@@ -124,7 +124,8 @@
       "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs?per_page=5\")",
       "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs?per_page=10\")",
       "Bash(curl -s \"https://api.github.com/repos/24Skater/isovault/actions/runs/26009053716/jobs\")",
-      "Bash(curl -s -L \"https://api.github.com/repos/24Skater/isovault/actions/jobs/76445986924/logs\")"
+      "Bash(curl -s -L \"https://api.github.com/repos/24Skater/isovault/actions/jobs/76445986924/logs\")",
+      "Bash(gh release create v1.0.0 --title v1.0.0 --notes ' *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\ramos\\.claude\\skills",
