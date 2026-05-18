@@ -96,10 +96,30 @@
       "Skill(superpowers:writing-plans:*)",
       "Skill(superpowers:subagent-driven-development)",
       "Skill(superpowers:subagent-driven-development:*)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(find /c/Users/ramos -name \"*.db\" 2>/dev/null | grep -i isovault | head -5; ls /c/Users/ramos/GitHub/isovault/data 2>/dev/null || echo \"no data dir\"; ls /c/Users/ramos/GitHub/isovault/*.db 2>/dev/null || echo \"no db at root\")",
+      "Read(//c/Users/ramos/**)",
+      "Bash(curl -s http://localhost:3721/api/health)",
+      "Bash(curl -s http://localhost:3721/)",
+      "Read(//c/iso-store/db//**)",
+      "Read(//c/iso-store/**)",
+      "Bash(sqlite3 /c/iso-store/db/iso-manager.sqlite3 \"SELECT key, value FROM settings WHERE key = 'api_key_hash';\")",
+      "Bash(sqlite3 /c/iso-store/db/iso-manager.sqlite3 \"SELECT * FROM settings;\")",
+      "Bash(where sqlite3 *)",
+      "Bash(node -e \"const Database = require\\('better-sqlite3'\\); const db = new Database\\('C:/iso-store/db/iso-manager.sqlite3', {readonly: true}\\); const rows = db.prepare\\('SELECT key, value FROM settings'\\).all\\(\\); console.log\\(JSON.stringify\\(rows, null, 2\\)\\); db.close\\(\\);\")",
+      "Bash(node -e ' *)",
+      "mcp__plugin_ecc_playwright__browser_navigate",
+      "Bash(node scripts/take-screenshots.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -H \"Authorization: Bearer screenshot-test-key-2026\" http://localhost:3721/api/definitions)",
+      "Bash(pkill -f \"tsx watch src/server.ts\")",
+      "Bash(pkill -f \"vite\")",
+      "Bash(ISO_MANAGER_API_KEY=screenshot-test-key-2026 npm run dev -w packages/backend)",
+      "Read(//tmp/**)",
+      "Bash(npm run dev -w packages/frontend > /tmp/frontend-dev.log 2>&1 & *)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\ramos\\.claude\\skills"
+      "C:\\Users\\ramos\\.claude\\skills",
+      "\\tmp"
     ]
   }
 }

@@ -18,7 +18,9 @@ IsoVault is a self-hosted service for managing OS ISO files. Define a source, ch
 <div align="center">
   <img src="./docs/screenshot-dashboard.png" alt="IsoVault dashboard" width="860" />
   <br/><br/>
-  <img src="./docs/screenshot-catalog.png" alt="ISO catalog with watch status" width="860" />
+  <img src="./docs/screenshot-catalog.png" alt="ISO catalog" width="860" />
+  <br/><br/>
+  <img src="./docs/screenshot-settings.png" alt="Settings" width="860" />
 </div>
 
 ## Contents
@@ -388,7 +390,7 @@ npm run lint       # ESLint across all packages
 | Package | Path | Stack |
 |---|---|---|
 | `@isovault/backend` | `packages/backend/` | Fastify · better-sqlite3 · node-cron · TypeScript |
-| `@isovault/frontend` | `packages/frontend/` | React 18 · Vite · Tailwind CSS · TypeScript |
+| `@isovault/frontend` | `packages/frontend/` | React 18 · Vite · CSS custom properties · TypeScript |
 | `@isovault/e2e` | `packages/e2e/` | End-to-end test suite |
 
 ---
