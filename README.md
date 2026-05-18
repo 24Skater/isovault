@@ -4,10 +4,10 @@
 
 <div align="center">
 
-[![CI](https://img.shields.io/github/actions/workflow/status/24Skater/isovault/ci.yml?branch=main&style=flat-square&label=CI&color=6366f1)](https://github.com/24Skater/isovault/actions)
-[![License](https://img.shields.io/github/license/24Skater/isovault?style=flat-square&color=6366f1)](./LICENSE)
-[![Release](https://img.shields.io/github/v/release/24Skater/isovault?style=flat-square&color=6366f1)](https://github.com/24Skater/isovault/releases)
-[![Stars](https://img.shields.io/github/stars/24Skater/isovault?style=flat-square&color=6366f1)](https://github.com/24Skater/isovault/stargazers)
+[![CI](https://img.shields.io/github/actions/workflow/status/24Skater/isovault/ci.yml?branch=main&style=flat-square&label=CI&color=6366f1&cacheSeconds=300)](https://github.com/24Skater/isovault/actions)
+[![License](https://img.shields.io/github/license/24Skater/isovault?style=flat-square&color=6366f1&cacheSeconds=300)](./LICENSE)
+[![Release](https://img.shields.io/github/v/release/24Skater/isovault?style=flat-square&color=6366f1&cacheSeconds=300)](https://github.com/24Skater/isovault/releases)
+[![Stars](https://img.shields.io/github/stars/24Skater/isovault?style=flat-square&color=6366f1&cacheSeconds=300)](https://github.com/24Skater/isovault/stargazers)
 [![Node](https://img.shields.io/badge/Node.js-%E2%89%A520-6366f1?style=flat-square)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-6366f1?style=flat-square)](https://www.typescriptlang.org)
 [![Docker](https://img.shields.io/badge/Docker-ready-6366f1?style=flat-square)](./Dockerfile)
